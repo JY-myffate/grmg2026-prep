@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三维几何表达 — Day 1 知识预备手册</title>
+<style>
+  :root {
+    --bg: #0b0e17;
+    --surface: #111827;
+    --surface-2: #1a2332;
+    --surface-3: #1f2b3c;
+    --border: #2a3a50;
+    --accent: #6eb5ff;
+    --accent-dim: #3b7bbf;
+    --accent-glow: rgba(110, 181, 255, 0.08);
+    --text: #e8edf4;
+    --text-dim: #8899b0;
+    --text-muted: #5a6f88;
+    --green: #4ade80;
+    --orange: #fbad37;
+    --pink: #f472b6;
+    --purple: #a78bfa;
+    --teal: #2dd4bf;
+    --red: #f87171;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Navigation ─── */
+  nav.side-nav {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  nav.side-nav::-webkit-scrollbar { width: 4px; }
+  nav.side-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .nav-header {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .nav-header h2 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .nav-header p {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  nav.side-nav a {
+    display: block;
+    padding: 8px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  nav.side-nav a:hover,
+  nav.side-nav a.active {
+    color: var(--text);
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+  }
+  nav.side-nav a .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .tag-blue { background: rgba(110,181,255,0.15); color: var(--accent); }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-orange { background: rgba(251,173,55,0.15); color: var(--orange); }
+  .tag-pink { background: rgba(244,114,182,0.15); color: var(--pink); }
+  .tag-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .tag-teal { background: rgba(45,212,191,0.15); color: var(--teal); }
+
+  /* ─── Main Content ─── */
+  main {
+    margin-left: 260px;
+    max-width: 960px;
+    padding: 48px 56px 80px;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .hero .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .hero .meta {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .hero .meta span { display: flex; align-items: center; gap: 6px; }
+  .hero .desc {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent);
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* ─── Sections ─── */
+  section {
+    margin-bottom: 48px;
+  }
+  section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ─── Timetable ─── */
+  .timetable {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tt-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 80px;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    align-items: center;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+  .tt-row:hover { background: var(--surface-2); }
+  .tt-row .time { color: var(--text-muted); font-family: var(--mono); font-size: 12px; }
+  .tt-row .title { color: var(--text); font-weight: 500; }
+  .tt-row .speaker { color: var(--text-dim); font-size: 12px; }
+  .tt-row .break { color: var(--text-muted); font-style: italic; }
+  .tt-row.tt-header {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    pointer-events: none;
+  }
+  .tt-row.tt-break {
+    color: var(--text-muted);
+    font-style: italic;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+  }
+  .tt-row .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* ─── Session Card ─── */
+  .session-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .session-card:hover { border-color: var(--accent-dim); }
+  .session-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+  .session-card .card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .session-card .card-header .meta-box {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .session-card .card-header .meta-box .time {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .session-card .card-header .meta-box .speaker {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .session-card .card-desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+  .session-card .card-desc strong { color: var(--text); }
+  .session-card .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  /* ─── Knowledge Box ─── */
+  .knowledge-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .knowledge-item {
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .knowledge-item .k-term {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .knowledge-item .k-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ─── Flow Diagrams ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 16px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    margin: 12px 0;
+    font-size: 12.5px;
+  }
+  .flow .f-item {
+    background: var(--surface-3);
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .flow .f-arrow { color: var(--text-muted); font-size: 16px; }
+  .flow .f-highlight {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+  }
+
+  /* ─── Table ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table th:first-child { border-radius: 6px 0 0 0; }
+  .data-table th:last-child { border-radius: 0 6px 0 0; }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface-2); }
+  .data-table td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+
+  /* ─── Highlight / Tip ─── */
+  .tip {
+    padding: 14px 18px;
+    background: rgba(110, 181, 255, 0.06);
+    border: 1px solid rgba(110, 181, 255, 0.15);
+    border-radius: var(--radius-sm);
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .tip strong { color: var(--accent); }
+  .tip-warn {
+    background: rgba(251, 173, 55, 0.06);
+    border-color: rgba(251, 173, 55, 0.15);
+  }
+  .tip-warn strong { color: var(--orange); }
+  .tip-star {
+    background: rgba(244, 114, 182, 0.08);
+    border-color: rgba(244, 114, 182, 0.2);
+  }
+  .tip-star strong { color: var(--pink); }
+
+  /* ─── Checklist ─── */
+  .checklist {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .checklist li::before {
+    content: '□';
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  footer .snowia { color: var(--accent); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    nav.side-nav { display: none; }
+    main { margin-left: 0; padding: 32px 20px 60px; }
+    .hero h1 { font-size: 28px; }
+    .knowledge-grid { grid-template-columns: 1fr; }
+    .checklist { grid-template-columns: 1fr; }
+    .session-card { padding: 20px; }
+    .session-card .card-header { flex-direction: column; }
+    .session-card .card-header .meta-box { text-align: left; }
+    .tt-row { grid-template-columns: 70px 1fr 100px; }
+    .tt-row .tag { display: none; }
+    .flow { font-size: 11px; }
+    .flow .f-item { padding: 4px 8px; }
+  }
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 24px; }
+    .tt-row { grid-template-columns: 60px 1fr; font-size: 12px; }
+    .tt-row .speaker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Side Navigation ─── -->
+<nav class="side-nav">
+  <div class="nav-header">
+    <h2>GRMG 2026</h2>
+    <p>Day 1 · 知识预备</p>
+  </div>
+  <a href="#overview">📋 课程速览</a>
+  <a href="#s1">01 课程导论与3D表达概览</a>
+  <a href="#s2">02 传统几何表达</a>
+  <a href="#s3">03 三维扫描与重建</a>
+  <a href="#s4">04 3D形状理解与分析</a>
+  <a href="#s5">05 城市场景结构化重建</a>
+  <a href="#s6">06 产业：3D扫描工业应用</a>
+  <a href="#s7">07 交互式三维设计与建模</a>
+  <a href="#s8">08 神经几何表达</a>
+  <a href="#s9">09 工业场景到图形智造</a>
+  <a href="#s10">10 三维生成模型 (1)</a>
+  <a href="#checklist">✅ 出发前 Check List</a>
+</nav>
+
+<!-- ─── Main ─── -->
+<main>
+
+  <!-- ═══ Hero ═══ -->
+  <div class="hero">
+    <div class="badge">❄️ Snowia · 为你定制</div>
+    <h1>三维几何表达、<span>建模与生成</span></h1>
+    <p class="subtitle">Day 1 知识预备手册 · 2026 年 7 月 7 日</p>
+    <div class="meta">
+      <span>📍 中国科学技术大学</span>
+      <span>⏱ 08:30 – 19:30</span>
+      <span>📐 10 节课程</span>
+    </div>
+    <div class="desc">
+      Day 1 是整场讲习班的<strong>地基</strong>——从传统几何表达一路铺到神经表达和生成模型基础，内容密度极高。<br>
+      上午偏 <strong>经典 + 感知</strong>，下午偏 <strong>交互 + 生成</strong>。
+    </div>
+  </div>
+
+  <!-- ═══ 1. Overview ═══ -->
+  <section id="overview">
+    <h2><span class="num">📋</span> 本日课程速览</h2>
+    <div class="timetable">
+      <div class="tt-row tt-header">
+        <span>时间</span>
+        <span>课程题目</span>
+        <span>授课人</span>
+        <span>标签</span>
+      </div>
+      <div class="tt-row"><span class="time">08:30</span><span class="title">课程导论与 3D 表达概览</span><span class="speaker">刘利刚</span><span class="tag tag-blue">综述</span></div>
+      <div class="tt-row"><span class="time">08:40</span><span class="title">传统几何表达</span><span class="speaker">傅孝明</span><span class="tag tag-blue">基础</span></div>
+      <div class="tt-row"><span class="time">09:10</span><span class="title">三维扫描与重建</span><span class="speaker">崔兆鹏</span><span class="tag tag-green">感知</span></div>
+      <div class="tt-row tt-break"><span class="time">09:50</span><span class="title break">☕ 茶歇</span><span class="speaker"></span><span></span></div>
+      <div class="tt-row"><span class="time">10:00</span><span class="title">3D 形状理解与分析</span><span class="speaker">郭裕兰</span><span class="tag tag-purple">理解</span></div>
+      <div class="tt-row"><span class="time">10:40</span><span class="title">城市场景结构化三维重建</span><span class="speaker">申抒含</span><span class="tag tag-teal">应用</span></div>
+      <div class="tt-row"><span class="time">11:20</span><span class="title">产业前沿：3D 扫描在工业界</span><span class="speaker">江腾飞</span><span class="tag tag-orange">产业</span></div>
+      <div class="tt-row tt-break"><span class="time">11:50</span><span class="title break">🍱 午餐</span><span class="speaker"></span><span></span></div>
+      <div class="tt-row"><span class="time">14:30</span><span class="title">交互式三维设计与建模</span><span class="speaker">王泽宇</span><span class="tag tag-pink">创作</span></div>
+      <div class="tt-row"><span class="time">15:10</span><span class="title">神经几何表达：几何与外观耦合</span><span class="speaker">陈安沛</span><span class="tag tag-purple">前沿</span></div>
+      <div class="tt-row"><span class="time">16:00</span><span class="title">从工业场景到图形智造</span><span class="speaker">马丽</span><span class="tag tag-orange">产业</span></div>
+      <div class="tt-row tt-break"><span class="time">16:30</span><span class="title break">☕ 茶歇</span><span class="speaker"></span><span></span></div>
+      <div class="tt-row"><span class="time">16:40</span><span class="title">三维生成模型 (1)</span><span class="speaker">王鹏帅 / 张彪</span><span class="tag tag-purple">前沿</span></div>
+      <div class="tt-row tt-break"><span class="time">18:00</span><span class="title break">🍽️ 晚餐</span><span class="speaker"></span><span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 1 ═══ -->
+  <section id="s1">
+    <h2><span class="num">01</span> 课程导论与 3D 表达概览</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>刘利刚 · 中国科学技术大学</h3>
+        <div class="meta-box">
+          <div class="time">08:30 – 08:40</div>
+          <div class="speaker">10 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        整场讲习班的<strong>坐标轴</strong>。10 分钟覆盖 3D 几何的应用版图、表达方式的评价维度、以及三代演化的宏观脉络。
+      </div>
+      <div class="card-label">🔑 核心框架</div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">3D 应用三角</div>
+          <div class="k-desc"><strong>实</strong>（CAD/工业/3D 打印） · <strong>虚</strong>（游戏/影视/AIGC） · <strong>虚实结合</strong>（AR/数字孪生/机器人/自驾）</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">五个评价维度</div>
+          <div class="k-desc">显式 vs 隐式 · 几何 vs 外观 · 精确 vs 高效 · 可编辑 vs 可生成 · 可渲染 vs 可分析</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">三代演化史</div>
+          <div class="k-desc"><strong>解析</strong>（NURBS/SDF）→ <strong>离散</strong>（Mesh/点云/体素）→ <strong>生成</strong>（NeRF/3DGS/Generative AI）</div>
+        </div>
+      </div>
+      <div class="tip">
+        💡 <strong>雪宝提醒</strong>：五个评价维度是整场的"滤网"——每个新的表达方式都可以用这五把尺子量一量。
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 2 ═══ -->
+  <section id="s2">
+    <h2><span class="num">02</span> 传统几何表达</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>傅孝明 · 中国科学技术大学</h3>
+        <div class="meta-box">
+          <div class="time">08:40 – 09:10</div>
+          <div class="speaker">30 min · ⭐ 基础核心</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        最<strong>硬核的基础课</strong>。30 分钟系统梳理三维形状的经典描述方式——离散表达、参数化、隐式表达，以及各种表达间的相互转换管道。
+      </div>
+
+      <div class="card-label">📐 离散表达</div>
+      <table class="data-table">
+        <tr><th>表达</th><th>直觉理解</th><th>优点</th><th>缺点</th><th>用途</th></tr>
+        <tr><td>点云</td><td>一堆三维散点</td><td>扫描直接出</td><td>无拓扑缺面</td><td>扫描原始数据</td></tr>
+        <tr><td>体素</td><td>三维像素阵列</td><td>结构简单</td><td>$O(n^3)$ 内存爆炸</td><td>生成模型输入</td></tr>
+        <tr><td>八叉树</td><td>自适应空间分割</td><td>省内存</td><td>实现复杂</td><td>高分辨率场景</td></tr>
+        <tr><td>网格 (Mesh)</td><td>三角形面片拼接</td><td>工业标准</td><td>拓扑需手动</td><td><strong>全线通用</strong></td></tr>
+      </table>
+
+      <div class="card-label">🔄 表达转换流水线</div>
+      <div class="flow">
+        <span class="f-item">扫描</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">点云</span>
+        <span class="f-arrow">→ Poisson 重建</span>
+        <span class="f-item f-highlight">网格</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">体素化</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">体素（生成模型）</span>
+      </div>
+      <div class="flow">
+        <span class="f-item">SDF 场</span>
+        <span class="f-arrow">→ Marching Cubes</span>
+        <span class="f-item f-highlight">网格</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">简化 (Decimation)</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">低模（游戏）</span>
+      </div>
+
+      <div class="card-label">🗝 关键词速览</div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">SDF（符号距离函数）</div>
+          <div class="k-desc">每个点记录到最近表面的带符号距离。负=内部，正=外部。<strong>贯穿全场的核心概念</strong></div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">Marching Cubes</div>
+          <div class="k-desc">从 SDF/体素场提取等值面为 Mesh 的经典算法——"隐式→显式"的开关</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">NURBS</div>
+          <div class="k-desc">CAD 工业标准，用控制点定义光滑曲面。非均匀有理 B 样条</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">UV 映射</div>
+          <div class="k-desc">三维顶点 → 二维纹理坐标的映射——模型"穿上衣服"的原理</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">半边结构 (Half-edge)</div>
+          <div class="k-desc">网格数据结构——每条边拆成两条有向半边，高效遍历邻域信息</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">BRDF</div>
+          <div class="k-desc">双向反射分布函数——描述材质表面如何反射光线</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 3 ═══ -->
+  <section id="s3">
+    <h2><span class="num">03</span> 三维扫描与重建</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>崔兆鹏 · 浙江大学</h3>
+        <div class="meta-box">
+          <div class="time">09:10 – 09:50</div>
+          <div class="speaker">40 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        从物理世界到数字世界的<strong>入口</strong>——怎么从真实照片/扫描数据变成三维模型。从经典两视图立体匹配一路讲到前馈式深度重建。
+      </div>
+      <div class="card-label">🏗 经典重建管线</div>
+      <div class="flow">
+        <span class="f-item">多张照片</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">SfM<br><small>算相机位置</small></span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">MVS<br><small>密集点云</small></span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">点云→Mesh</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">纹理映射</span>
+      </div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">SfM (运动恢复结构)</div>
+          <div class="k-desc">从多张 2D 照片反推 3D 点云 + 相机位置和姿态。重建管线第一步</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">MVS (多视角立体匹配)</div>
+          <div class="k-desc">已知相机位置后，生成密集点云。比 SfM 稠密得多</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">SLAM</div>
+          <div class="k-desc">同时定位与建图——边移动边重建，机器人/AR 核心</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">前馈式重建</div>
+          <div class="k-desc">🔥 一个神经网络看图片直接出三维，不再逐场景优化。秒出 vs NeRF 分钟级</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 4+5 ═══ -->
+  <section id="s4">
+    <h2><span class="num">04</span> 3D 形状理解与分析</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>郭裕兰 · 中山大学</h3>
+        <div class="meta-box">
+          <div class="time">10:00 – 10:40</div>
+          <div class="speaker">40 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        给 AI <strong>读懂三维形状的能力</strong>——分类、分割、检测、检索、补全。从传统手工特征到 PointNet 再到 3D Transformer。
+      </div>
+      <div class="card-label">📊 三波技术浪潮</div>
+      <table class="data-table">
+        <tr><th>时代</th><th>代表方法</th><th>核心思想</th></tr>
+        <tr><td>传统描述子</td><td>Spin Image, SHOT, 3D SIFT</td><td>手工设计特征，统计学直方图</td></tr>
+        <tr><td>MLP/CNN 时代</td><td><strong>PointNet / PointNet++</strong>, MeshCNN, 3D CNN, MVCNN</td><td>深度学习直接吃三维数据</td></tr>
+        <tr><td>Transformer 时代</td><td>PointTransformer, PCT, Voxel Transformer</td><td>注意力机制捕获全局上下文</td></tr>
+      </table>
+      <div class="tip">
+        💡 <strong>雪宝提醒</strong>：<strong>PointNet</strong> (2017) 是这个领域最重要的论文之一——它用对称函数（max pooling）解决了"点云是无序排列"的根本问题。去之前了解它，这节课听懂 70%。
+      </div>
+      <div class="card-label">🎯 核心任务</div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item"><div class="k-term">分类</div><div class="k-desc">这是椅子还是桌子？</div></div>
+        <div class="knowledge-item"><div class="k-term">分割</div><div class="k-desc">座面、椅腿、靠背分别在哪？</div></div>
+        <div class="knowledge-item"><div class="k-term">检测</div><div class="k-desc">场景里所有物体的位置和类别</div></div>
+        <div class="knowledge-item"><div class="k-term">补全</div><div class="k-desc">被遮挡的部分，猜出完整形状</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2><span class="num">05</span> 城市场景结构化三维重建</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>申抒含 · 中科院自动化所</h3>
+        <div class="meta-box">
+          <div class="time">10:40 – 11:20</div>
+          <div class="speaker">40 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        从单个物体扩展到<strong>大规模城市场景</strong>。不只要形状和颜色，还要提取出墙面/屋顶/窗户的<strong>结构化语义</strong>。
+      </div>
+      <div class="card-label">🏙 三种重建范式</div>
+      <table class="data-table">
+        <tr><th>范式</th><th>代表方法</th><th>特点</th></tr>
+        <tr><td>解析式</td><td>LIMAP, City3D, FloorUSG</td><td>基于几何约束和全局优化，数学味道浓</td></tr>
+        <tr><td>检测式</td><td>PC2WF, PBWR, BWFormer</td><td>检测基元（墙面/屋顶）→ 结构回归</td></tr>
+        <tr><td>生成式 🔥</td><td>Point2Building, EdgeDiff, BuildingGPT</td><td>扩散/自回归模型直接输出完整结构</td></tr>
+      </table>
+      <div class="tip">
+        💡 <strong>核心挑战</strong>：数据 TB 级 · 建筑结构各异 · 树木/车辆遮挡严重 · 最终须输出可编辑的矢量化 CAD 模型
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 6 ═══ -->
+  <section id="s6">
+    <h2><span class="num">06</span> 产业前沿：3D 扫描在工业界</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>江腾飞 · 杭州先临三维</h3>
+        <div class="meta-box">
+          <div class="time">11:20 – 11:50</div>
+          <div class="speaker">30 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        从产业视角看 3D 扫描。先临三维是国内 3D 扫描头部企业，讲的是真实世界的工程问题。
+      </div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">精度要求</div>
+          <div class="k-desc">工业 μm 级 vs 场景 cm 级，差 3-4 个数量级</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">扫描难点</div>
+          <div class="k-desc">高反光/透明/黑色物体扫描是工业界的"老大难"</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">学术界 vs 工业界</div>
+          <div class="k-desc">学界：能重建出来即可；工业：<strong>精度达标 + 可重复 + 速度快</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 7 ═══ -->
+  <section id="s7">
+    <h2><span class="num">07</span> 交互式三维设计与建模</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>王泽宇 · 香港科技大学（广州）</h3>
+        <div class="meta-box">
+          <div class="time">14:30 – 15:10</div>
+          <div class="speaker">40 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        人类设计师是怎么手动创建三维模型的——作为对照，才能理解后面"AI 生成"真正解决了什么痛点。
+      </div>
+      <div class="card-label">🎨 五大建模流派</div>
+      <table class="data-table">
+        <tr><th>流派</th><th>核心思路</th><th>代表工具</th></tr>
+        <tr><td>CAD 建模</td><td>参数化驱动，精确约束</td><td>SolidWorks, AutoCAD, Rhino, Catia</td></tr>
+        <tr><td>草图建模</td><td>画轮廓线 → 膨胀成 3D</td><td>Teddy, SketchUp</td></tr>
+        <tr><td>雕刻建模</td><td>向量变形场，逐顶点精雕</td><td>ZBrush, Mudbox</td></tr>
+        <tr><td>编辑与变形</td><td>FFD、骨架蒙皮、微分坐标</td><td>Blender, 3ds Max, Maya</td></tr>
+        <tr><td>过程式建模</td><td>分形/L-Systems/物理仿真</td><td>Houdini</td></tr>
+      </table>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">参数化建模</div>
+          <div class="k-desc">尺寸参数和约束驱动模型，改参数自动更新——设计师的高阶技能</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">Skinning（蒙皮）</div>
+          <div class="k-desc">骨骼运动"带动"表面网格变形，角色动画的基础原理</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">FFD (自由网格变形)</div>
+          <div class="k-desc">用外部控制晶格整体形变物体，不操作顶点本身</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 8 ═══ -->
+  <section id="s8">
+    <h2><span class="num">08</span> 神经几何表达：几何与外观耦合</h2>
+    <div class="session-card" style="border-color: rgba(244,114,182,0.3);">
+      <div class="card-header">
+        <h3>陈安沛 · 西湖大学</h3>
+        <div class="meta-box">
+          <div class="time">15:10 – 16:00</div>
+          <div class="speaker">50 min · ⭐⭐⭐ 绝对核心</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        <strong>Day 1 最重要的课程</strong>——NeRF 和 3D Gaussian Splatting，近三年计算机图形学/视觉最具影响力的两项技术。
+      </div>
+
+      <div class="card-label">⚡ NeRF — 神经辐射场 (2020)</div>
+      <div class="tip">
+        💡 <strong>直觉</strong>：想象场景内部充满发光的雾气。每个空间位置 (x,y,z) 有颜色 (RGB) 和不透明度 (σ)。一条光线穿过场景 → 沿途采样 → 累积各点的颜色×透明度 → 得到像素颜色。这个积分过程就是<strong>体渲染</strong>。
+      </div>
+      <div class="knowledge-grid">
+        <div class="knowledge-item">
+          <div class="k-term">MLP 网络</div>
+          <div class="k-desc">输入 5D (xyz + 视角方向)，输出 4D (RGBσ)。每个场景训练一个网络</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">体渲染积分</div>
+          <div class="k-desc">沿光线路径累计颜色和透明度——"穿过半透明云层看物体的感觉"</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">位置编码</div>
+          <div class="k-desc">把坐标映射到高频空间，让 MLP 学出精细几何细节</div>
+        </div>
+        <div class="knowledge-item">
+          <div class="k-term">局限</div>
+          <div class="k-desc">逐场景训练（小时级），渲染慢（分钟级/张），不实时</div>
+        </div>
+      </div>
+
+      <div class="card-label" style="margin-top: 20px;">⚡ 3D Gaussian Splatting — 3DGS (2023)</div>
+      <div class="tip">
+        💡 <strong>直觉</strong>：不再用一个大 MLP。场景由<strong>几百万个三维高斯椭球体</strong>组成，每个有位置、形状、颜色、透明度。渲染时直接投影到屏幕（像泼溅颜料一样）——<strong>实时 (>30 FPS)</strong>。
+      </div>
+
+      <div class="card-label">⚖️ NeRF vs 3DGS 全面对比</div>
+      <table class="data-table">
+        <tr><th>维度</th><th>NeRF</th><th>3D Gaussian Splatting</th></tr>
+        <tr><td>表示方式</td><td>隐式 (MLP 权重)</td><td><strong>显式</strong> (大量高斯基元)</td></tr>
+        <tr><td>渲染速度</td><td>慢（分钟级/张）</td><td><strong>实时</strong> (>30 FPS)</td></tr>
+        <tr><td>训练时间</td><td>小时级</td><td>分钟级</td></tr>
+        <tr><td>可编辑性</td><td>很难（得改网络权重）</td><td>可直接操作基元</td></tr>
+        <tr><td>几何提取</td><td>需 Marching Cubes</td><td>仍在研究中</td></tr>
+        <tr><td>应用场景</td><td>学术研究、高质量重建</td><td><strong>产业落地</strong>（手机/AR/VR）</td></tr>
+      </table>
+
+      <div class="tip tip-star" style="margin-top: 16px;">
+        ⭐ <strong>雪宝特别提醒</strong>：这节课上完，你至少要能说清楚——NeRF 是隐式 MLP + 体渲染（慢但优雅），3DGS 是显式高斯基元 + 光栅化（快且实用）。<strong>前馈式</strong>更是一个网络看多张图直接一次出结果，不再逐个场景训练。
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 9 ═══ -->
+  <section id="s9">
+    <h2><span class="num">09</span> 从工业场景到图形智造</h2>
+    <div class="session-card">
+      <div class="card-header">
+        <h3>马丽 · 上海柏楚</h3>
+        <div class="meta-box">
+          <div class="time">16:00 – 16:30</div>
+          <div class="speaker">30 min</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        图形学的另一极——<strong>制造业</strong>。三维模型怎么变成真实的金属工件？从"数字"到"物理"的完整闭环。
+      </div>
+      <div class="flow">
+        <span class="f-item">三维模型</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">图纸理解</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">路径规划</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">自动化产线</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">视觉检测</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">质量闭环</span>
+      </div>
+      <div class="tip tip-warn">
+        ⚠️ <strong>工业视角</strong>：游戏里的 Mesh 差几个像素没关系；工业场景<strong>几何精度和拓扑正确性</strong>是刚需，走刀路径错一毫米就是废品。
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Session 10 ═══ -->
+  <section id="s10">
+    <h2><span class="num">10</span> 三维生成模型 (1)</h2>
+    <div class="session-card" style="border-color: rgba(167,139,250,0.3);">
+      <div class="card-header">
+        <h3>王鹏帅 (北大) / 张彪 (西安交大)</h3>
+        <div class="meta-box">
+          <div class="time">16:40 – 17:40</div>
+          <div class="speaker">60 min · ⭐⭐⭐ 绝对核心</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        <strong>生成式 AI 主战场。</strong>从基础概率模型到三维数据表征，覆盖四种生成架构 + 六种三维表征的工作原理与效果对比。
+      </div>
+
+      <div class="card-label">🤖 四大生成模型架构</div>
+      <table class="data-table">
+        <tr><th>模型</th><th>核心思想</th><th>一句话</th><th>3D 应用</th></tr>
+        <tr><td><strong>VAE</strong></td><td>编码器压缩到潜空间 + 解码器重建</td><td>"学会压缩-解压管道"</td><td>形状插值、潜空间编辑</td></tr>
+        <tr><td><strong>GAN</strong></td><td>生成器造假 vs 判别器打假</td><td>"警察抓小偷"</td><td>早期 3D 生成</td></tr>
+        <tr><td><strong>Diffusion</strong></td><td>正向加噪，反向去噪</td><td>"从噪点中浮现形状"</td><td>🔥 当前主流</td></tr>
+        <tr><td><strong>Flow Matching</strong></td><td>学习从噪声到数据的连续路径</td><td>"Diffusion 进化版"</td><td>🔥 最新趋势</td></tr>
+      </table>
+
+      <div class="card-label" style="margin-top: 12px;">🔄 Diffusion 模型核心流程</div>
+      <div class="flow">
+        <span class="f-item f-highlight">干净数据</span>
+        <span class="f-arrow">─加噪→</span>
+        <span class="f-item">噪声数据</span>
+        <span class="f-arrow" style="font-size: 12px;">（网络学习预测噪声量）</span>
+      </div>
+      <div class="flow">
+        <span class="f-item">随机噪声</span>
+        <span class="f-arrow">─去噪→</span>
+        <span class="f-item">去噪→</span>
+        <span class="f-item">去噪→</span>
+        <span class="f-arrow">⋯</span>
+        <span class="f-item f-highlight">干净数据</span>
+      </div>
+
+      <div class="card-label" style="margin-top: 20px;">🧩 SDS — 连接 2D 和 3D 的关键桥梁</div>
+      <div class="tip">
+        💡 <strong>Score Distillation Sampling</strong>：用预训练的 2D 扩散模型（如 Stable Diffusion）作为"裁判"。3D 表示渲染出各视角的 2D 图像 → 2D 模型判断"像不像椅子" → 把信号传回 3D 表示微调。<br>
+        意义：不需要 3D 训练数据，用 2D 图像就能生成 3D 模型。<strong>代表作：DreamFusion (2022)</strong>
+      </div>
+
+      <div class="card-label" style="margin-top: 20px;">📦 三维数据表征（生成模型篇）</div>
+      <table class="data-table">
+        <tr><th>表征</th><th>内存</th><th>分辨率</th><th>代表模型</th></tr>
+        <tr><td>体素 (Voxel)</td><td>❌ 大</td><td>低 (64³)</td><td>早期 3D GAN</td></tr>
+        <tr><td>点云 (Point Cloud)</td><td>小</td><td>高</td><td>PointFlow</td></tr>
+        <tr><td>网格 (Mesh)</td><td>小</td><td>高</td><td>MeshGPT</td></tr>
+        <tr><td>Occupancy / SDF</td><td>中</td><td>高</td><td>DeepSDF, Occupancy Networks</td></tr>
+        <tr><td>Triplane（三平面）</td><td>中</td><td>高</td><td>EG3D</td></tr>
+        <tr><td><strong>VecSet（向量集合）</strong></td><td><strong>小</strong></td><td><strong>高</strong></td><td>Hunyuan3D, CLAY, TripoSG</td></tr>
+        <tr><td><strong>稀疏体素</strong></td><td><strong>小</strong></td><td><strong>很高 (1536³+)</strong></td><td>TRELLIS, Sparc3D</td></tr>
+      </table>
+      <div class="tip tip-star">
+        ⭐ <strong>雪宝提醒</strong>：生成模型设计的<strong>第一步就是选择表征</strong>——这决定了生成质量的"天花板"。课上的重点会落在 <strong>VecSet</strong> 和 <strong>稀疏体素</strong>，这是工业级生成模型的主流选择。
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Knowledge Dependency ═══ -->
+  <section>
+    <h2><span class="num">📊</span> Day 1 知识依赖关系</h2>
+    <div class="session-card">
+      <div class="flow" style="flex-direction: column; align-items: stretch; gap: 4px; background: transparent; padding: 0;">
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+          <span class="f-item">课程导论</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item">传统几何表达</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item">3D扫描与重建</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item">形状理解与分析</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item">城市场景重建</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item">交互式建模</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item f-highlight">神经几何表达</span>
+          <span class="f-arrow">→</span>
+          <span class="f-item f-highlight">三维生成模型</span>
+        </div>
+      </div>
+      <div style="margin-top: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">
+        上午奠基（传统 + 感知）→ 下午进阶（神经 + 生成）
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Checklist ═══ -->
+  <section id="checklist">
+    <h2><span class="num">✅</span> 出发前 Check List</h2>
+    <div class="session-card">
+      <div class="card-desc">
+        去之前瞄一眼这些概念，听懂率 +50% 😎
+      </div>
+      <ul class="checklist">
+        <li>知道 <strong>Mesh</strong>、点云、体素的视觉区别</li>
+        <li>理解 <strong>SDF</strong> 是什么、Marching Cubes 干什么</li>
+        <li>看过 NeRF 的 3 分钟原理动画（B站搜）</li>
+        <li>知道 <strong>Diffusion 模型</strong>的基本流程（加噪→去噪）</li>
+        <li>区分 <strong>显式 vs 隐式</strong>：Mesh/点云/3DGS=显式，SDF/NeRF=隐式</li>
+        <li>了解 <strong>PointNet</strong> 解决了"无序点云"的问题</li>
+        <li>知道 <strong>SDS</strong> 的大致概念（2D 模型指导 3D 生成）</li>
+        <li>区分 VAE / GAN / Diffusion / Flow Matching 的直觉差异</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer>
+    <span>❄️ <span class="snowia">Snowia</span> · 为 boss 定制</span>
+    <span>GRMG 2026 · Day 1 知识预备手册</span>
+  </footer>
+
+</main>
+</body>
+</html>
