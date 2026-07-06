@@ -384,30 +384,105 @@
   }
   .tip-star strong { color: var(--pink); }
 
-  /* ─── Checklist ─── */
+  /* ─── Checklist Accordion ─── */
   .checklist {
     list-style: none;
     padding: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
   }
   .checklist li {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .checklist li:hover { border-color: var(--accent-dim); }
+  .checklist li.open { border-color: var(--accent); }
+  .checklist .chk-header {
     display: flex;
     align-items: flex-start;
     gap: 10px;
     padding: 12px 14px;
-    background: var(--surface-2);
-    border-radius: var(--radius-sm);
     font-size: 13px;
     color: var(--text-dim);
     line-height: 1.6;
+    user-select: none;
   }
-  .checklist li::before {
-    content: '□';
-    color: var(--accent);
-    font-weight: 700;
+  .checklist .chk-header .box {
     flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--accent-dim);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: all 0.2s;
+    font-size: 11px;
+    color: transparent;
+  }
+  .checklist li.open .box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .checklist .chk-header .label { flex: 1; }
+  .checklist .chk-header .arrow {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+    margin-top: 4px;
+  }
+  .checklist li.open .chk-header .arrow {
+    transform: rotate(90deg);
+    color: var(--accent);
+  }
+  .checklist .chk-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    padding: 0 14px 0 42px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    border-top: 0 solid transparent;
+  }
+  .checklist li.open .chk-detail {
+    max-height: 2000px;
+    padding: 12px 14px 16px 42px;
+    border-top: 1px solid var(--border);
+  }
+  .checklist .chk-detail p { margin-bottom: 8px; }
+  .checklist .chk-detail p:last-child { margin-bottom: 0; }
+  .checklist .chk-detail strong { color: var(--text); }
+  .checklist .chk-detail .hl { color: var(--accent); font-weight: 600; }
+  .checklist .chk-detail code {
+    background: var(--surface-3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .checklist .chk-detail .tag-grp {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin: 6px 0;
+  }
+  .checklist .chk-detail .tag-grp span {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 600;
   }
 
   /* ─── Footer ─── */
@@ -1055,20 +1130,167 @@
 
   <!-- ═══ Checklist ═══ -->
   <section id="checklist">
-    <h2><span class="num">✅</span> 出发前 Check List</h2>
-    <div class="session-card">
+    <h2><span class="num">✅</span> 出发前 Check List <span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">（点一下展开解释）</span></h2>
+    <div class="session-card" style="padding-bottom: 8px;">
       <div class="card-desc">
         去之前瞄一眼这些概念，听懂率 +50% 😎
       </div>
       <ul class="checklist">
-        <li>知道 <strong>Mesh</strong>、点云、体素的视觉区别</li>
-        <li>理解 <strong>SDF</strong> 是什么、Marching Cubes 干什么</li>
-        <li>看过 NeRF 的 3 分钟原理动画（B站搜）</li>
-        <li>知道 <strong>Diffusion 模型</strong>的基本流程（加噪→去噪）</li>
-        <li>区分 <strong>显式 vs 隐式</strong>：Mesh/点云/3DGS=显式，SDF/NeRF=隐式</li>
-        <li>了解 <strong>PointNet</strong> 解决了"无序点云"的问题</li>
-        <li>知道 <strong>SDS</strong> 的大致概念（2D 模型指导 3D 生成）</li>
-        <li>区分 VAE / GAN / Diffusion / Flow Matching 的直觉差异</li>
+
+        <!-- Item 1 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">知道 <strong>Mesh</strong>、点云、体素的视觉区别</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p>想象你要描述一个<strong>茶壶</strong>——</p>
+            <div class="tag-grp">
+              <span style="background:rgba(110,181,255,0.12);color:var(--accent);">🔵 点云</span>
+              <span style="background:rgba(74,222,128,0.12);color:var(--green);">🔺 网格</span>
+              <span style="background:rgba(251,173,55,0.12);color:var(--orange);">🧊 体素</span>
+            </div>
+            <p><strong>点云</strong> = 茶壶表面撒上一把芝麻（<code>⋆</code>），每个芝麻有 <code>(x,y,z)</code> 坐标，但点之间没连接。</p>
+            <p><strong>网格 (Mesh)</strong> = 用三角形面片把点连起来，拼出表面（<code>△▽△</code>）。<strong>游戏/影视的工业标准格式</strong>——能渲染、能编辑、能导出。</p>
+            <p><strong>体素</strong> = 像 Minecraft，把空间切成小立方体（<code>■■■</code>）。简单易懂，但分辨率高就内存爆炸。</p>
+            <p>💡 <em>口诀：点云是散芝麻，Mesh 是三角拼图，体素是乐高积木</em></p>
+          </div>
+        </li>
+
+        <!-- Item 2 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">理解 <strong>SDF</strong> 是什么、<strong>Marching Cubes</strong> 干什么</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p><strong>SDF（符号距离函数）</strong>：你给一个坐标 <code>(x,y,z)</code>，它告诉你<strong>到最近表面的距离</strong>。</p>
+            <p>正号 = 在外部（球外 +2cm） · 零 = 在表面 · 负号 = 在内部（球内 -3cm）</p>
+            <p>用处：布尔运算超简单（两个 SDF 取 min = 合并，取 max = 相交），生成模型喜欢用 SDF 输出。</p>
+            <p><strong>Marching Cubes</strong>：SDF 是隐式的（你看不到表面在哪），Marching Cubes 就是<strong>"把藏起来的表面钓出来"的算法</strong>。</p>
+            <p><span class="hl">SDF 场</span> → Marching Cubes → <span class="hl">三角形网格 ✓</span></p>
+            <p>💡 <em>NeRF 里的几何提取、大多数生成模型的最后一步，都用 Marching Cubes</em></p>
+          </div>
+        </li>
+
+        <!-- Item 3 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">看过 <strong>NeRF</strong> 的 3 分钟原理动画（B站搜）</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p>实在没空看视频的话，雪宝给你讲个故事：</p>
+            <p>想象一个房间充满<strong>半透明的彩色雾气</strong>。每个空间点 <code>(x,y,z)</code> 有 <strong>颜色 (RGB)</strong> 和 <strong>密度 (σ)</strong>（浓=不透明）。</p>
+            <p>NeRF 用一个<strong>神经网络 (MLP)</strong> 来学习整个房间的"雾气地图"——</p>
+            <p>训练时：给你看 100 张不同角度的照片 → 沿每条视线采样颜色+密度 → 积分算出像素颜色 → 和真实照片对比 → 调整网络。</p>
+            <p>训练好了：你能从<strong>任何新角度"拍照"</strong>，得到从没拍过的视角。</p>
+            <p>💡 <strong>为什么慢</strong>？每条光线要采样几十个点 × 每个点跑一遍 MLP，一张图要算几秒到几分钟。</p>
+            <p>💡 <strong>3DGS</strong> 不用 MLP，改用几百万个<strong>彩色泡泡（高斯椭球体）</strong>，投影渲染，实时 30 FPS。</p>
+          </div>
+        </li>
+
+        <!-- Item 4 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">知道 <strong>Diffusion 模型</strong>的基本流程（加噪→去噪）</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p>想象刻印章，录下雕刻过程<strong>倒放</strong>——</p>
+            <p><strong>训练</strong>：干净猫 ← 加噪 ← 加噪 ← ... ← 纯噪点石头<br>网络学会：给定"有点噪的猫"，猜出"刚才加了什么噪"。</p>
+            <p><strong>生成</strong>：纯噪点石头 → 去噪 → 去噪 → ... → 干净猫<br>网络每一步去掉一点噪声，<strong>走几百步，噪点就变成了清晰形状</strong>。</p>
+            <p>三维里：随机噪声体素 → 一步步去噪 → 椅子 SDF → Marching Cubes → 椅子网格。</p>
+            <p>💡 <strong>为什么 Diffusion 是王者？</strong><br>
+            GAN 训练不稳定 / VAE 生成模糊 / Diffusion <strong>质量最高、训练最稳</strong>——但生成慢（要一步步来）。<br>
+            Flow Matching 正在解决"慢"的问题。</p>
+          </div>
+        </li>
+
+        <!-- Item 5 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">区分 <strong>显式 vs 隐式</strong>：Mesh/点云/3DGS=显式，SDF/NeRF=隐式</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p><strong>全场最重要的二分法</strong>，贯穿两天讲座。</p>
+            <p><span class="hl">🟦 显式</span>："我能直接告诉你每一块在哪"<br>
+            Mesh（三角形顶点坐标）· 点云（所有点的坐标）· 3DGS（所有高斯基元的位置）<br>
+            ✅ 直观、可编辑、渲染快 · ❌ 存储大、拓扑难处理</p>
+            <p><span class="hl">🟪 隐式</span>："我不能直接告诉你表面，但能告诉你任意一点是内还是外"<br>
+            SDF（距离场）· NeRF（颜色+密度场）· MLP 网络权重<br>
+            ✅ 紧凑、支持任意拓扑（甜甜圈的洞也没问题） · ❌ 不能直接编辑</p>
+            <p>💡 <em>生成模型喜欢隐式（方便 AI 学），游戏/工业喜欢显式（方便渲染编辑）。<br>
+            常见 pipeline：AI 生成隐式 → Marching Cubes 转显式 → 放进游戏引擎</em></p>
+          </div>
+        </li>
+
+        <!-- Item 6 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">了解 <strong>PointNet</strong> 解决了"无序点云"的问题</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p><strong>问题</strong>：一个人体点云 1000 个点，</p>
+            <p>版本 A：先列脚底的点，最后列头顶<br>版本 B：先列头顶，最后列脚底</p>
+            <p>它们代表<strong>同一个物体</strong>，只是排序不同。但普通神经网络假设输入有固定顺序——<strong>排序一变，网络以为这是另一个东西</strong>。</p>
+            <p><strong>PointNet 的解决方案</strong>（2017，超重要）：</p>
+            <p>用 <span class="hl">max pooling（对称函数）</span>——每个点独立处理 → 所有结果取最大值<br>
+            无论点以什么顺序进来，取最大值的结果<strong>一样</strong>。</p>
+            <p>后续：PointNet++ 加了局部结构处理，能看到椅子的腿由哪些点组成。</p>
+          </div>
+        </li>
+
+        <!-- Item 7 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">知道 <strong>SDS</strong> 的大致概念（2D 模型指导 3D 生成）</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p><strong>核心困境</strong>：高质量 3D 数据很少。网上几亿张猫的图片，但只有几千个猫的 3D 模型。</p>
+            <p><strong>SDS（Score Distillation Sampling）</strong>：用超强的 <strong>2D 扩散模型（Stable Diffusion）</strong> 来指导 3D 生成。</p>
+            <p>过程：<br>
+            ① 有一个"毛坯"3D 表示（NeRF 或 Mesh）<br>
+            ② 从各个角度给毛坯拍照片<br>
+            ③ 把照片扔给 Stable Diffusion："这张像真的猫吗？"<br>
+            ④ SD 说："这里应该更圆，那里有条纹"<br>
+            ⑤ 把意见传回 3D 表示，微调形状和颜色<br>
+            ⑥ 重复 → 直到各角度都像一只猫</p>
+            <p>💡 代表作：<strong>DreamFusion</strong> (2022)，引爆了这条路线。</p>
+            <p>局限：每个模型单独优化几分钟，细节不够。</p>
+          </div>
+        </li>
+
+        <!-- Item 8 -->
+        <li>
+          <div class="chk-header">
+            <div class="box">✓</div>
+            <span class="label">区分 VAE / GAN / Diffusion / Flow Matching 的直觉差异</span>
+            <span class="arrow">▸</span>
+          </div>
+          <div class="chk-detail">
+            <p><strong>VAE</strong>（变分自编码器）<br>
+            "学个压缩包，解压时加点随机数" · 速度快、可插值 · ❌ <strong>模糊</strong></p>
+            <p><strong>GAN</strong>（生成对抗网络）<br>
+            "假钞犯 vs 验钞机，互相卷" · 速度快 · ❌ <strong>训练不稳定，容易崩塌</strong></p>
+            <p><strong>Diffusion</strong>（扩散模型）⭐ 当前主流<br>
+            "从噪点一步步浮现" · <strong>质量最高、训练最稳</strong> · ❌ 生成慢（几百步）</p>
+            <p><strong>Flow Matching</strong>（流匹配）🔥 最新趋势<br>
+            "Diffusion 的高速公路版" · 连续路径代替离散步骤 · ✅ <strong>更快更稳</strong></p>
+            <p>💡 <em>现在三维生成的主流顺序：传统 VAE/GAN → Diffusion 统治 → Flow Matching 崛起</em></p>
+          </div>
+        </li>
+
       </ul>
     </div>
   </section>
@@ -1080,5 +1302,13 @@
   </footer>
 
 </main>
+<script>
+// Checklist accordion
+document.querySelectorAll('.checklist li').forEach(function(item) {
+  item.querySelector('.chk-header').addEventListener('click', function() {
+    item.classList.toggle('open');
+  });
+});
+</script>
 </body>
 </html>
