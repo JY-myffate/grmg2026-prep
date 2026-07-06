@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GRMG 预备知识 · 8 大概念详解</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0d16;
+    --card: #111827;
+    --card-2: #172033;
+    --border: #253045;
+    --accent: #6eb5ff;
+    --accent-dim: #3a7cc0;
+    --text: #e6ebf5;
+    --text-dim: #9aacc4;
+    --text-muted: #5f7390;
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    padding: 0;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    padding: 32px 20px 28px;
+    text-align: center;
+    background: linear-gradient(180deg, #0f1a2e 0%, var(--bg) 100%);
+  }
+  .hero .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(110,181,255,0.1);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
+  }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ─── Content ─── */
+  main { padding: 8px 16px 48px; }
+
+  /* ─── Concept Card ─── */
+  .concept {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .concept-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .concept-header .num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(110,181,255,0.1);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .concept-header .info { flex: 1; min-width: 0; }
+  .concept-header .info h2 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .concept-header .info .q {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .concept-header .arrow {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    transition: transform 0.25s ease;
+    margin-top: 4px;
+  }
+  .concept.open .concept-header .arrow { transform: rotate(180deg); }
+
+  .concept-body {
+    display: none;
+    padding: 4px 18px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .concept.open .concept-body { display: block; }
+
+  /* ─── Content Styles ─── */
+  .concept-body p {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    line-height: 1.8;
+  }
+  .concept-body p strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .concept-body p em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .concept-body .highlight {
+    background: var(--card-2);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    margin: 10px 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+  .concept-body .highlight strong {
+    color: var(--text);
+  }
+  .concept-body .highlight .tag {
+    display: inline-block;
+    background: rgba(110,181,255,0.1);
+    color: var(--accent);
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .concept-body .code-block {
+    background: #080c16;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin: 10px 0;
+    font-family: "SF Mono", "Menlo", "Monaco", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .concept-body .inline-code {
+    background: var(--card-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .concept-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+  .concept-body .tip {
+    background: rgba(110,181,255,0.04);
+    border: 1px solid rgba(110,181,255,0.12);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .concept-body .tip strong { color: var(--accent); }
+  .concept-body ul {
+    padding-left: 18px;
+    margin: 8px 0;
+    list-style: none;
+  }
+  .concept-body ul li {
+    position: relative;
+    padding-left: 16px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .concept-body ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .concept-body .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 10px 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .concept-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 360px;
+  }
+  .concept-body table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--card-2);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .concept-body table td {
+    padding: 7px 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height: 1.6;
+    vertical-align: top;
+  }
+  .concept-body table tr:last-child td { border-bottom: none; }
+
+  /* ─── SVG diagrams as inline ─── */
+  .diagram-box {
+    background: var(--card-2);
+    border-radius: var(--radius-sm);
+    padding: 16px 12px;
+    margin: 10px 0;
+    text-align: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .diagram-box svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    padding: 24px 20px 32px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  footer .s { color: var(--accent); }
+
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 22px; }
+    .concept-header { padding: 14px 14px; }
+    .concept-header .info h2 { font-size: 14px; }
+    .concept-body { padding: 4px 14px 16px; }
+    .concept-body p { font-size: 13px; }
+    main { padding: 8px 12px 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">❄️ Snowia · 预备知识</div>
+  <h1>8 大概念 <span>一次讲透</span></h1>
+  <p>GRMG 2026 出发前 · 手机随时翻</p>
+</div>
+
+<main>
+
+  <!-- ═══ 1. Mesh vs Voxel vs Point Cloud ═══ -->
+  <div class="concept open" id="c1">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">1</div>
+      <div class="info">
+        <h2>Mesh vs 点云 vs 体素</h2>
+        <div class="q">三种 3D 表达长什么样？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+<div class="diagram-box">
+<svg viewBox="0 0 380 100" xmlns="http://www.w3.org/2000/svg" style="max-width:380px;">
+  <!-- Voxel -->
+  <rect x="10" y="15" width="70" height="70" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1.2"/>
+  <rect x="22" y="25" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="38" y="25" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="54" y="25" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="22" y="41" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="38" y="41" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.5"/>
+  <rect x="54" y="41" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="22" y="57" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="38" y="57" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <rect x="54" y="57" width="14" height="14" rx="2" fill="#6eb5ff" opacity="0.7"/>
+  <text x="45" y="98" text-anchor="middle" fill="#5f7390" font-size="10">体素（小方块）</text>
+  <!-- Arrow -->
+  <text x="104" y="58" text-anchor="middle" fill="#3a7cc0" font-size="22" font-weight="100">|</text>
+  <!-- Point Cloud -->
+  <rect x="130" y="15" width="70" height="70" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1.2"/>
+  <circle cx="143" cy="32" r="3" fill="#6eb5ff" opacity="0.9"/>
+  <circle cx="158" cy="28" r="2.5" fill="#6eb5ff" opacity="0.8"/>
+  <circle cx="172" cy="40" r="3" fill="#6eb5ff" opacity="0.7"/>
+  <circle cx="148" cy="48" r="2" fill="#6eb5ff" opacity="0.9"/>
+  <circle cx="165" cy="55" r="2.5" fill="#6eb5ff" opacity="0.8"/>
+  <circle cx="180" cy="68" r="3" fill="#6eb5ff" opacity="0.7"/>
+  <circle cx="139" cy="62" r="2" fill="#6eb5ff" opacity="0.6"/>
+  <circle cx="155" cy="68" r="2.5" fill="#6eb5ff" opacity="0.7"/>
+  <circle cx="182" cy="50" r="2" fill="#6eb5ff" opacity="0.8"/>
+  <circle cx="145" cy="70" r="2" fill="#6eb5ff" opacity="0.6"/>
+  <text x="165" y="98" text-anchor="middle" fill="#5f7390" font-size="10">点云（散点）</text>
+  <!-- Arrow -->
+  <text x="223" y="58" text-anchor="middle" fill="#3a7cc0" font-size="22" font-weight="100">|</text>
+  <!-- Mesh -->
+  <rect x="250" y="15" width="100" height="70" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1.2"/>
+  <polygon points="280,35 297,22 310,40 295,52" fill="none" stroke="#6eb5ff" stroke-width="1.2" opacity="0.8"/>
+  <polygon points="310,40 295,52 315,62" fill="none" stroke="#6eb5ff" stroke-width="1.2" opacity="0.6"/>
+  <polygon points="280,35 295,52 275,58" fill="none" stroke="#6eb5ff" stroke-width="1.2" opacity="0.7"/>
+  <circle cx="280" cy="35" r="2" fill="#6eb5ff"/>
+  <circle cx="297" cy="22" r="2" fill="#6eb5ff"/>
+  <circle cx="310" cy="40" r="2" fill="#6eb5ff"/>
+  <circle cx="295" cy="52" r="2" fill="#6eb5ff"/>
+  <circle cx="315" cy="62" r="2" fill="#6eb5ff"/>
+  <circle cx="275" cy="58" r="2" fill="#6eb5ff"/>
+  <text x="300" y="98" text-anchor="middle" fill="#5f7390" font-size="10">网格（三角形拼面）</text>
+</svg>
+</div>
+
+      <p><strong>体素</strong> = 想象 Minecraft 里的方块世界。三维空间被分割成一个个小立方体，每个要么有东西要么空着。结构简单，但精细时需要巨量方块。</p>
+
+      <p><strong>点云</strong> = 想象用喷漆罐对着雕塑喷，空气中悬浮的颜料颗粒。每个点只有 (x,y,z) 坐标，没有"面"，没有"哪个点属于哪个表面"的信息。</p>
+
+      <p><strong>网格 (Mesh)</strong> = 想象用三角形纸片拼一个纸模。每张"纸"知道相邻的是谁，能围成一个完整的表面。<strong>游戏和影视的工业标准</strong>。</p>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：体素≈积木块 · 点云≈悬浮粒子 · Mesh≈三角纸片搭的模型
+      </div>
+
+      <p>为什么理解这三者的区别很重要？因为 <strong>3D 扫描直接出点云 → 需要重建为网格才能用 → 但很多 AI 模型却用体素作为输入</strong>。三者之间的转换是贯穿全场的主题。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 2. SDF & Marching Cubes ═══ -->
+  <div class="concept" id="c2">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">2</div>
+      <div class="info">
+        <h2>SDF &amp; Marching Cubes</h2>
+        <div class="q">什么是符号距离函数？怎么变成网格？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>SDF（符号距离函数）</strong>——一个在三维空间每个位置告诉你"到最近表面的距离"的函数：</p>
+
+<div class="diagram-box">
+<svg viewBox="0 0 360 72" xmlns="http://www.w3.org/2000/svg" style="max-width:360px;">
+  <!-- Room -->
+  <rect x="10" y="12" width="340" height="48" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1"/>
+  <!-- Inside -->
+  <text x="80" y="42" text-anchor="middle" fill="#6eb5ff" font-size="12" font-weight="600">物体内部</text>
+  <text x="80" y="56" text-anchor="middle" fill="#5f7390" font-size="9">距离 = 负数</text>
+  <!-- Surface -->
+  <line x1="140" y1="12" x2="140" y2="60" stroke="#fbad37" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="155" y="42" text-anchor="middle" fill="#fbad37" font-size="10">表面 = 0</text>
+  <!-- Outside -->
+  <text x="260" y="42" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="600">物体外部</text>
+  <text x="260" y="56" text-anchor="middle" fill="#5f7390" font-size="9">距离 = 正数</text>
+</svg>
+</div>
+
+      <p>想象你站在一个房间里：</p>
+      <ul>
+        <li>你在房间<strong>里面</strong> → 到墙壁的距离 = <strong>正数</strong></li>
+        <li>你在房间<strong>外面</strong> → 到墙壁的距离 = <strong>负数</strong></li>
+        <li>你正好<strong>在墙上</strong> → 距离 = <strong>0</strong></li>
+      </ul>
+
+      <p><strong>为什么 SDF 是全场核心？</strong>因为很多 AI 生成模型的"中间格式"就是 SDF——神经网络先生成一个 SDF 场（隐式的函数），然后你需要把它变成能渲染的 Mesh。这就是 <strong>Marching Cubes</strong> 做的事：</p>
+
+      <div class="code-block">SDF 场（数学函数）→ <strong>Marching Cubes</strong> → Mesh（三角形网格）</div>
+
+      <p>Marching Cubes 走遍每一个小立方体，检查 8 个顶点是正还是负，然后根据正负组合决定这个立方体内部该画什么形状的三角形。</p>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：SDF 是"每个点到表面的距离"；Marching Cubes 是"把这个距离信息翻译成看得见的三角形网格"
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. NeRF Animation ═══ -->
+  <div class="concept" id="c3">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">3</div>
+      <div class="info">
+        <h2>NeRF 的原理（视频推荐）</h2>
+        <div class="q">为什么一定要看动画？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p>NeRF（神经辐射场）的体渲染过程，文字很难讲清楚，但一看动画就秒懂。</p>
+
+      <p><strong>去 B 站搜这些关键词，找个 3-5 分钟的视频：</strong></p>
+
+      <div class="highlight">
+        🔍 <strong>"NeRF 原理 动画"</strong> 或 <strong>"NeRF 五分钟理解"</strong>
+      </div>
+
+      <p><strong>看视频时注意这几个画面：</strong></p>
+      <ul>
+        <li>🔹 一条<strong>光线</strong>从相机出发穿过场景</li>
+        <li>🔹 光线上有<strong>几十个采样点</strong>，每个点被赋予颜色 + 不透明度</li>
+        <li>🔹 光线穿过后面的"浓雾"（不透明度高）会挡住后面的东西</li>
+        <li>🔹 穿过透明的地方就继续前进</li>
+        <li>🔹 <strong>最终把所有采样点的贡献累加起来</strong>，就是像素的颜色</li>
+      </ul>
+
+      <p>这个"累加过程"就是 <strong>体渲染 (Volume Rendering)</strong>——NeRF 最核心的公式。</p>
+
+      <p><strong>为什么 NeRF 这么牛？</strong>它用一个 MLP 网络存下整个场景（隐式），从任意新视角都能渲染出逼真的图像。但缺点也很明显——<strong>渲染很慢</strong>，每条光线都要算几十次网络推理。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 4. Diffusion ═══ -->
+  <div class="concept" id="c4">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">4</div>
+      <div class="info">
+        <h2>Diffusion 模型</h2>
+        <div class="q">"从噪声中洗出照片"是怎么回事？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p>想象你在暗房里冲洗一张照片——但这次是反向操作：</p>
+
+      <p><strong>训练阶段（AI 学习）：</strong></p>
+      <div class="diagram-box">
+<svg viewBox="0 0 360 56" xmlns="http://www.w3.org/2000/svg" style="max-width:360px;">
+  <rect x="10" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#6eb5ff" stroke-width="1.2"/>
+  <text x="32" y="33" text-anchor="middle" fill="#6eb5ff" font-size="9">清楚</text>
+  <text x="54" y="31" fill="#3a7cc0" font-size="14">→</text>
+  <rect x="68" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="90" y="33" text-anchor="middle" fill="#5f7390" font-size="8">模糊</text>
+  <text x="112" y="31" fill="#3a7cc0" font-size="14">→</text>
+  <rect x="126" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="148" y="33" text-anchor="middle" fill="#5f7390" font-size="8">更糊</text>
+  <text x="170" y="31" fill="#3a7cc0" font-size="14">→⋯→</text>
+  <rect x="198" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#2a3a50" stroke-width="1"/>
+  <text x="220" y="28" text-anchor="middle" fill="#5f7390" font-size="8">雪花屏</text>
+  <text x="220" y="40" text-anchor="middle" fill="#3a7cc0" font-size="8">纯噪声</text>
+</svg>
+      </div>
+
+      <ul>
+        <li>一张 <strong>干净的照片</strong> → 加一点点噪声 → 依然清楚</li>
+        <li>再加一点 → 有点模糊了</li>
+        <li>再加再加 → 只剩 <strong>纯随机雪花屏</strong></li>
+      </ul>
+
+      <p>AI 学会了：<strong>"从每一层'模糊 → 更模糊'的过程中，我能不能反过来预测——看到模糊的，猜出清晰的长什么样？"</strong></p>
+
+      <p><strong>生成阶段（AI 创作）：</strong></p>
+      <div class="diagram-box">
+<svg viewBox="0 0 360 56" xmlns="http://www.w3.org/2000/svg" style="max-width:360px;">
+  <rect x="10" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#2a3a50" stroke-width="1"/>
+  <text x="32" y="28" text-anchor="middle" fill="#5f7390" font-size="8">随机</text>
+  <text x="32" y="40" text-anchor="middle" fill="#5f7390" font-size="8">噪声</text>
+  <text x="54" y="31" fill="#3a7cc0" font-size="14">→</text>
+  <rect x="68" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="90" y="33" text-anchor="middle" fill="#5f7390" font-size="8">去一点</text>
+  <text x="112" y="31" fill="#3a7cc0" font-size="14">→</text>
+  <rect x="126" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="148" y="33" text-anchor="middle" fill="#5f7390" font-size="8">再清晰</text>
+  <text x="170" y="31" fill="#3a7cc0" font-size="14">→⋯→</text>
+  <rect x="198" y="10" width="44" height="36" rx="6" fill="#1a2332" stroke="#6eb5ff" stroke-width="1.2"/>
+  <text x="220" y="28" text-anchor="middle" fill="#6eb5ff" font-size="8">🎉 生成</text>
+  <text x="220" y="40" text-anchor="middle" fill="#6eb5ff" font-size="8">结果</text>
+</svg>
+      </div>
+
+      <ul>
+        <li>从<strong>纯随机噪声</strong>开始 → AI 去一小点噪声 → 隐约看到轮廓</li>
+        <li>再去一点 → 更清楚了</li>
+        <li>反复 50-100 步 → 🎉 得到一张清晰的图像或 3D 模型</li>
+      </ul>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：Diffusion = "正向加噪直到变雪花 → 反向一步步去噪恢复出干净数据"。<strong>几乎所有主流 AI 生图（Stable Diffusion、Midjourney、DALL·E 3）都基于这个原理。</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. Explicit vs Implicit ═══ -->
+  <div class="concept" id="c5">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">5</div>
+      <div class="info">
+        <h2>显式 vs 隐式</h2>
+        <div class="q">全场最重要的概念对</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p>这是整场讲习班<strong>最核心的一对概念</strong>。任何 3D 表达方式都可以归入其一。</p>
+
+      <p><strong>显式（Explicit）</strong>——"<strong>我知道它长什么样，我能摸着它</strong>"</p>
+      <ul>
+        <li>给你一堆<strong>顶点坐标</strong>："顶点 A 在 (1,2,3)，顶点 B 在 (4,5,6)……"</li>
+        <li>你能直接编辑、移动每一个顶点</li>
+        <li>代表：<strong>Mesh</strong>（三角形顶点）、<strong>点云</strong>（每个点的坐标）、<strong>3DGS</strong>（每个高斯球的位置）</li>
+      </ul>
+
+      <p><strong>隐式（Implicit）</strong>——"<strong>我不知道它长啥样，但给我一个点我能算出来</strong>"</p>
+      <ul>
+        <li>给你一个<strong>函数</strong>："你输入坐标 (x,y,z)，我告诉你这个点是不是在物体内部"</li>
+        <li>你不能直接"看到"形状，但可以无限精细地查询</li>
+        <li>代表：<strong>SDF</strong>（输入坐标→输出距离）、<strong>NeRF</strong>（输入坐标→输出颜色密度）</li>
+      </ul>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>显式</th><th>隐式</th></tr>
+        <tr><td>类比</td><td>给你所有零件的清单</td><td>给你一张设计图纸</td></tr>
+        <tr><td>编辑</td><td>✅ 直接改顶点</td><td>❌ 得改函数/网络</td></tr>
+        <tr><td>渲染</td><td>⚡ 快（直接画三角形）</td><td>🐢 慢（每条光线要算）</td></tr>
+        <tr><td>AI 生成</td><td>❌ 难（结构复杂）</td><td>✅ 易（连续平滑）</td></tr>
+        <tr><td>代表</td><td>Mesh, 点云, 3DGS</td><td>SDF, NeRF, Occupancy</td></tr>
+      </table>
+      </div>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：显式≈"直接把形状给你"；隐式≈"给你一个查询函数，要自己算"。
+      </div>
+
+      <p><strong>为什么这很重要？</strong>因为 3D 生成模型的路线之争，本质上就是"选显式还是隐式"——隐式好生成（AI 擅长预测平滑的函数），但生成后要转成显式才能用（需要 Marching Cubes）。而 3DGS 走显式路线，直接生成高斯基元，不需要那一步转换。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 6. PointNet ═══ -->
+  <div class="concept" id="c6">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">6</div>
+      <div class="info">
+        <h2>PointNet</h2>
+        <div class="q">点云的神经网络，解决了什么难题？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>点云的核心难题：无序性</strong></p>
+
+      <div class="code-block">点云 = {(1,2,3), (4,5,6), (7,8,9)}
+打乱顺序 = {(4,5,6), (1,2,3), (7,8,9)}
+
+在计算机看来：这是两个完全不同的输入！
+但在物理上：它们代表同一个点云！</div>
+
+      <p>传统神经网络（CNN、RNN）对输入顺序敏感——先读到 A 再读到 B，和先读 B 再读 A，网络会认为不一样。但点云不管怎么换顺序，物理上都是一样的。</p>
+
+      <p><strong>PointNet 的解法（2017 年提出，超级优雅）：</strong></p>
+
+<div class="diagram-box">
+<svg viewBox="0 0 340 70" xmlns="http://www.w3.org/2000/svg" style="max-width:340px;">
+  <!-- Input points -->
+  <circle cx="45" cy="18" r="5" fill="#6eb5ff" opacity="0.8"/>
+  <circle cx="45" cy="35" r="5" fill="#6eb5ff" opacity="0.6"/>
+  <circle cx="45" cy="52" r="5" fill="#6eb5ff" opacity="0.7"/>
+  <text x="45" y="68" text-anchor="middle" fill="#5f7390" font-size="8">每个点独立</text>
+  <text x="45" y="76" text-anchor="middle" fill="#5f7390" font-size="8">提取特征</text>
+
+  <text x="70" y="37" fill="#3a7cc0" font-size="16">→</text>
+
+  <!-- Shared MLP arrows -->
+  <rect x="90" y="8" width="80" height="54" rx="6" fill="#172033" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="130" y="30" text-anchor="middle" fill="#6eb5ff" font-size="10" font-weight="600">Max</text>
+  <text x="130" y="44" text-anchor="middle" fill="#6eb5ff" font-size="10" font-weight="600">Pooling</text>
+  <text x="130" y="56" text-anchor="middle" fill="#5f7390" font-size="8">取最大值</text>
+
+  <text x="178" y="37" fill="#3a7cc0" font-size="16">→</text>
+
+  <!-- Output -->
+  <circle cx="220" cy="35" r="20" fill="#1a2332" stroke="#6eb5ff" stroke-width="1.2"/>
+  <text x="220" y="32" text-anchor="middle" fill="#6eb5ff" font-size="10" font-weight="600">全局</text>
+  <text x="220" y="44" text-anchor="middle" fill="#6eb5ff" font-size="10" font-weight="600">特征</text>
+  <text x="220" y="57" text-anchor="middle" fill="#5f7390" font-size="8">不管顺序</text>
+</svg>
+</div>
+
+      <p><strong>核心思想</strong>：每个点单独提取特征 → 把所有点的特征用 <strong>Max Pooling（取最大值）</strong>汇合。因为"取最大值"这个操作不依赖任何顺序，所以不管 100 个点还是 10000 个点、不管顺序怎么变，最终输出都一样。</p>
+
+      <p><strong>类比</strong>：你让十个人每人写一句对电影的评价，然后你只看<strong>最尖锐</strong>的那句。不管十个人什么顺序发言，你看到的"最尖锐评价"是一样的。</p>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：PointNet 用"每个点独立提特征 → 再取所有特征的最大值"这个技巧，彻底解决了<strong>点云的无序性问题</strong>。
+      </div>
+
+      <p>后来有了 PointNet++（加了局部区域分析），再后来有了 Point Transformer，但 PointNet 是所有后续工作的起点。听郭裕兰老师的"3D 形状理解与分析"课前，<strong>了解 PointNet 就能听懂 70%</strong>。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 7. SDS ═══ -->
+  <div class="concept" id="c7">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">7</div>
+      <div class="info">
+        <h2>SDS — Score Distillation Sampling</h2>
+        <div class="q">怎么用 2D 图片来生成 3D 模型？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>SDS 解决了一个根本困境：</strong></p>
+      <div class="highlight">
+        🌐 网上有几亿张猫的图片，但 3D 猫模型只有几千个。<br>
+        如果直接训练 AI 生成 3D 模型，数据不够 → 效果差。
+      </div>
+
+      <p><strong>SDS 的跨时代思路（2022 年 DreamFusion 提出）：</strong></p>
+
+      <div class="diagram-box">
+<svg viewBox="0 0 340 90" xmlns="http://www.w3.org/2000/svg" style="max-width:340px;">
+  <!-- 2D Model -->
+  <rect x="100" y="8" width="130" height="34" rx="8" fill="#172033" stroke="#6eb5ff" stroke-width="1.2"/>
+  <text x="165" y="30" text-anchor="middle" fill="#6eb5ff" font-size="11" font-weight="600">预训练 2D 扩散模型</text>
+  <text x="165" y="46" text-anchor="middle" fill="#5f7390" font-size="8">看过海量 2D 图片的"裁判"</text>
+
+  <!-- Down arrow -->
+  <text x="165" y="60" fill="#3a7cc0" font-size="12">⬇ 评价</text>
+
+  <!-- 3D Model -->
+  <rect x="80" y="64" width="170" height="28" rx="8" fill="#172033" stroke="#3a7cc0" stroke-width="1"/>
+  <text x="165" y="82" text-anchor="middle" fill="#6eb5ff" font-size="10">3D 表示（NeRF/Mesh）→ 渲染成 2D</text>
+</svg>
+      </div>
+
+      <ol style="padding-left:18px; margin:10px 0;">
+        <li style="font-size:13px;color:var(--text-dim);line-height:1.7;">一个 3D 模型从各个角度<strong>渲染出 2D 图像</strong></li>
+        <li style="font-size:13px;color:var(--text-dim);line-height:1.7;">2D 扩散模型（如 Stable Diffusion）评价这些图<strong>"像不像猫"</strong></li>
+        <li style="font-size:13px;color:var(--text-dim);line-height:1.7;">把"不像"的信号<strong>传回 3D 模型</strong>，让它微调</li>
+        <li style="font-size:13px;color:var(--text-dim);line-height:1.7;">反复迭代 → 最终得到一个<strong>从任何角度看都像猫</strong>的 3D 模型</li>
+      </ol>
+
+      <p><strong>比喻</strong>：你（3D 模型）在画一幅画，导师（2D 模型）时不时看一眼说"这个角度不对"→ 你修改 → 再给导师看 → 反复直到满意。关键是你不需要 3D 训练数据，导师只看了无数 2D 图片就够用了。</p>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：SDS = 用"看过无数 2D 图片的 AI"当裁判，指导 3D 模型从各个角度都画得逼真。<strong>代表作：DreamFusion（2022）</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 8. VAE / GAN / Diffusion / Flow Matching ═══ -->
+  <div class="concept" id="c8">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">8</div>
+      <div class="info">
+        <h2>四大生成模型</h2>
+        <div class="q">VAE / GAN / Diffusion / Flow Matching</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>VAE（变分自编码器）</strong></p>
+      <p>输入一张猫图 → 编码器把它压缩成一个"潜变量" → 解码器尝试还原。生成新图时：从潜空间随便取一个向量 → 解码器生成。特点是<strong>稳定、可控</strong>，但生成的图<strong>有点糊</strong>。3D 中用来做形状平滑插值。</p>
+      <div class="highlight">💡 <strong>一句话比喻</strong>："我学会了压缩和解压，但细节记不太清了"</div>
+
+      <hr>
+
+      <p><strong>GAN（生成对抗网络）</strong></p>
+      <p>生成器（造假者）从噪声造图 → 判别器（警察）判断真假 → 造假者学得更精 → 警察变得更敏锐 → 互相逼迫进步。生成效果好，但<strong>训练不稳定</strong>，动不动"崩盘"。现在 3D 生成已经不主要用 GAN 了。</p>
+      <div class="highlight">💡 <strong>一句话比喻</strong>："造假者和警察互相逼对方进步，最后造假者能骗过所有人"</div>
+
+      <hr>
+
+      <p><strong>Diffusion（扩散模型）🔥 当前王者</strong></p>
+      <p>正向一步步加噪到纯噪声 → 反向一步步去噪恢复。这是<strong>目前三维生成的主流架构</strong>。效果好、训练稳定、多样性高。Stable Diffusion、Midjourney、DALL·E 3 都是它。</p>
+      <div class="highlight">💡 <strong>一句话比喻</strong>："从一堆噪点中逐步洗出清晰的图像，每一步只去一点点"</div>
+
+      <hr>
+
+      <p><strong>Flow Matching（流匹配）🔥 最新趋势</strong></p>
+      <p>扩散是"一步步离散地走"（像走楼梯），Flow Matching 是"连续平滑地流"（像滑滑梯）。数学更漂亮、训练更简单，是扩散模型的进化版。三维生成的最新论文很多都在用这个框架。</p>
+      <div class="highlight">💡 <strong>一句话比喻</strong>："扩散的平滑版，一条滑梯从噪声直达干净数据"</div>
+
+      <hr>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>模型</th><th>一句话</th><th>3D 角色</th></tr>
+        <tr><td><strong>VAE</strong></td><td>压缩-解压，细节不够</td><td>形状插值、潜空间编辑</td></tr>
+        <tr><td><strong>GAN</strong></td><td>造假 vs 打假</td><td>历史产物，现在很少用</td></tr>
+        <tr><td><strong>Diffusion</strong></td><td>加噪→去噪</td><td>🔥 当前三维生成主流架构</td></tr>
+        <tr><td><strong>Flow Matching</strong></td><td>连续流路径</td><td>🔥 最新趋势</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ❄️ <span class="s">Snowia</span> · GRMG 2026 预备知识 · 点卡片展开详情
+</footer>
+
+<script>
+function toggle(el) {
+  var card = el.closest ? el.closest('.concept') : el.parentElement;
+  if (!card) return;
+  card.classList.toggle('open');
+  // Safari on WeChat needs explicit scroll handling
+  if (card.classList.contains('open')) {
+    setTimeout(function() {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+}
+// Ensure first card starts open
+document.addEventListener('DOMContentLoaded', function() {
+  var first = document.querySelector('.concept.open');
+  if (first) first.classList.add('open');
+});
+</script>
+
+</body>
+</html>
