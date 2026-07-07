@@ -401,9 +401,9 @@
 
       <p>想象你站在一个房间里：</p>
       <ul>
-        <li>你在房间<strong>里面</strong> → 到墙壁的距离 = <strong>正数</strong></li>
-        <li>你在房间<strong>外面</strong> → 到墙壁的距离 = <strong>负数</strong></li>
-        <li>你正好<strong>在墙上</strong> → 距离 = <strong>0</strong></li>
+        <li>你在房间<strong>外面</strong>（物体外部）→ 到墙壁的距离 = <strong>正数</strong></li>
+        <li>你在房间<strong>里面</strong>（物体内部）→ 到墙壁的距离 = <strong>负数</strong></li>
+        <li>你正好<strong>在墙上</strong>（表面） → 距离 = <strong>0</strong></li>
       </ul>
 
       <p><strong>为什么 SDF 是全场核心？</strong>因为很多 AI 生成模型的"中间格式"就是 SDF——神经网络先生成一个 SDF 场（隐式的函数），然后你需要把它变成能渲染的 Mesh。这就是 <strong>Marching Cubes</strong> 做的事：</p>
