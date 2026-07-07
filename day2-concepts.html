@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GRMG Day 2 · 核心概念图文详解</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0d16; --card: #111827; --card-2: #172033; --border: #253045;
+    --accent: #6eb5ff; --accent-dim: #3a7cc0; --text: #e6ebf5; --text-dim: #9aacc4; --text-muted: #5f7390;
+    --radius: 14px; --radius-sm: 10px;
+    --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+    --mono: 'SF Mono', 'Menlo', monospace;
+  }
+  body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;
+    padding: 0;
+  }
+  .hero { padding: 32px 20px 28px; text-align: center; background: linear-gradient(180deg, #0f1a2e 0%, var(--bg) 100%); }
+  .hero .badge { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(110,181,255,0.1); padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; letter-spacing: 0.04em; }
+  .hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 8px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 14px; color: var(--text-dim); max-width: 380px; margin: 0 auto; }
+  main { padding: 8px 16px 48px; }
+
+  .concept { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+  .concept-header { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .concept-header .num { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(110,181,255,0.1); color: var(--accent); font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .concept-header .info { flex: 1; min-width: 0; }
+  .concept-header .info h2 { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--text); }
+  .concept-header .info .q { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .concept-header .arrow { flex-shrink: 0; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 16px; transition: transform 0.25s ease; margin-top: 4px; }
+  .concept.open .concept-header .arrow { transform: rotate(180deg); }
+  .concept-body { display: none; padding: 4px 18px 20px; border-top: 1px solid var(--border); }
+  .concept.open .concept-body { display: block; }
+
+  .concept-body p { font-size: 14px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.8; }
+  .concept-body p strong { color: var(--text); font-weight: 600; }
+  .concept-body .highlight { background: var(--card-2); border-left: 3px solid var(--accent); padding: 12px 14px; margin: 10px 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 13px; line-height: 1.7; color: var(--text-dim); }
+  .concept-body .highlight strong { color: var(--text); }
+  .concept-body .tip { background: rgba(110,181,255,0.04); border: 1px solid rgba(110,181,255,0.12); border-radius: var(--radius-sm); padding: 11px 14px; margin: 10px 0; font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .concept-body .tip strong { color: var(--accent); }
+  .concept-body .tip-warn { background: rgba(251,173,55,0.06); border-color: rgba(251,173,55,0.15); }
+  .concept-body .tip-warn strong { color: #fbad37; }
+  .concept-body ul { padding-left: 18px; margin: 8px 0; list-style: none; }
+  .concept-body ul li { position: relative; padding-left: 16px; margin-bottom: 6px; font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .concept-body ul li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .concept-body .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  .concept-body table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 360px; }
+  .concept-body table th { text-align: left; padding: 8px 10px; background: var(--card-2); color: var(--text-muted); font-weight: 600; font-size: 11px; white-space: nowrap; }
+  .concept-body table td { padding: 7px 10px; border-top: 1px solid var(--border); color: var(--text-dim); line-height: 1.6; vertical-align: top; }
+  .concept-body table tr:last-child td { border-bottom: none; }
+  .concept-body hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  footer { text-align: center; padding: 24px 20px 32px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 8px; max-width: 820px; margin-left: auto; margin-right: auto; }
+  footer .s { color: var(--accent); }
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 22px; }
+    .concept-header { padding: 14px 14px; }
+    .concept-body { padding: 4px 14px 16px; }
+    .concept-body p { font-size: 13px; }
+    main { padding: 8px 12px 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">❄️ Snowia · Day 2 特供</div>
+  <h1>三维生成 · <span>前沿概念详解</span></h1>
+  <p>7 个核心概念，帮你在 Day 2 起飞 🚀</p>
+</div>
+
+<main>
+
+  <!-- ═══ 1. SDS ═══ -->
+  <div class="concept open" id="c1">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">1</div>
+      <div class="info"><h2>SDS — Score Distillation Sampling</h2><div class="q">怎么用 2D 图片教 AI 生成 3D？</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p><strong>SDS（分数蒸馏采样）</strong>是 2022 年 DreamFusion 提出的革命性方法，它解决了一个根本问题：<strong>3D 训练数据太少</strong>。</p>
+      <p>思路：用预训练的 2D 扩散模型（Stable Diffusion）当"评委"。</p>
+      <ul>
+        <li>一个 3D 模型从各个角度渲染出 2D 图像</li>
+        <li>2D 模型评价"这张图像不像猫"</li>
+        <li>把"不像"的梯度信号传回 3D 表示，让它微调</li>
+        <li>反复迭代 → 得到从任何角度都像猫的 3D 模型</li>
+      </ul>
+      <div class="highlight">💡 <strong>雪宝比喻</strong>：像你画素描，导师（2D 模型）时不时看一眼说"这个角度不对"，你改一下再给他看，反复直到满意。神奇的是导师只见过 2D 图片，没摸过 3D 雕塑！</div>
+      <p><strong>局限</strong>：每个样本需要单独优化（分钟级），多视角不一致，几何细节不足。被后续的多视角扩散方法改进。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 2. 多视角扩散 ═══ -->
+  <div class="concept" id="c2">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">2</div>
+      <div class="info"><h2>多视角扩散 → 前馈重建</h2><div class="q">"先图后模型"路线，推理 10 秒内</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p>SDS 的瓶颈是"每个样本需优化分钟级"。多视角扩散的思路彻底改变了这一点：</p>
+      <div class="highlight">
+        <strong>两步走：</strong><br>
+        1️⃣ 先生成<strong>多张一致的多视角图像</strong>（正面、侧面、背面...）— 用 MVDream、Zero123 等模型<br>
+        2️⃣ 再通过<strong>前馈重建模型</strong>从多张图直接重建 3D — Instant3D、Wonder3D、InstantMesh 等
+      </div>
+      <p><strong>关键突破</strong>：第二步是"前馈"的（一次前向传播），不再需要逐样本优化。推理速度从分钟级降到<strong>10 秒内</strong>！</p>
+      <p><strong>局限</strong>：几何精度仍有提升空间，依赖于多视图生成的一致性（如果多视图之间有矛盾，重建会出问题）。</p>
+      <div class="tip">💡 <strong>雪宝的"拍照建模比喻"</strong>：SDS 像画家对着实物反复修改；多视角扩散像你对着物体拍几张照片→AI 一看照片就秒出 3D 模型。显然拍照更快！</div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. 两条路线 ═══ -->
+  <div class="concept" id="c3">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">3</div>
+      <div class="info"><h2>原生 3D 大模型：两条路线之争</h2><div class="q">稀疏体素 vs VecSet，谁代表未来？</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p>2023-2025 年，原生 3D 大模型（直接在 3D 数据上训练，不依赖 2D 先验）形成了<strong>两条技术路线</strong>：</p>
+      <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>路线一：稀疏体素</th><th>路线二：VecSet</th></tr>
+        <tr><td><strong>核心思想</strong></td><td>只在物体表面附近存体素，用八叉树/SLAT 组织</td><td>将 3D 形状编码为无序向量集合</td></tr>
+        <tr><td><strong>优势</strong></td><td>天然支持空间结构，适合高分辨率</td><td>表示紧凑、训练高效、几何细节丰富</td></tr>
+        <tr><td><strong>代表模型</strong></td><td>TRELLIS v1/v2, Sparc3D</td><td>Hunyuan3D, CLAY, TripoSG</td></tr>
+        <tr><td><strong>最新进展</strong></td><td>Sparc3D 已达 1536³ 分辨率！</td><td>Hunyun3D 已商业落地</td></tr>
+      </table>
+      </div>
+      <div class="tip-warn">
+        ⚠️ <strong>雪宝的"图书馆 vs 索引卡比喻"</strong>：<br>
+        稀疏体素像图书馆——书按位置摆放，找书快（空间结构好），但书架占地方（内存开销）。<br>
+        VecSet 像索引卡片盒——每张卡片描述一本书的关键信息，非常紧凑，但不太"空间直观"。
+      </div>
+      <p><strong>未来趋势</strong>：两条路线正在融合——稀疏体素 + VecSet 结合，取长补短。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 4. 网格直接生成 ═══ -->
+  <div class="concept" id="c4">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">4</div>
+      <div class="info"><h2>多边形网格直接生成</h2><div class="q">跳过隐式场，直接输出可用的 Mesh</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p><strong>什么是网格直接生成？</strong>大多数 3D 生成是先输出隐式场（SDF/NeRF）→ 再用 Marching Cubes 转 Mesh。而网格直接生成<strong>一步到位输出 Mesh</strong>。</p>
+      <ul>
+        <li><strong>核心挑战</strong>：要保证拓扑正确（水密、无自交）、结构合理、面数高效</li>
+        <li><strong>代表模型</strong>：PolyGen（自回归逐顶点）、MeshGPT、MeshXL、TreeMeshGPT</li>
+        <li><strong>技术意义</strong>：直接输出工业标准格式，减少后处理，真正端到端</li>
+      </ul>
+      <div class="highlight">💡 <strong>雪宝的"写作 vs 翻译比喻"</strong>：传统方法像你写中文→机器翻译成英文（隐式→Mesh，多一步损失）；网格直接生成像你直接用英文写作——一步到位，质量更高。</div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. 场景生成 vs 物体生成 ═══ -->
+  <div class="concept" id="c5">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">5</div>
+      <div class="info"><h2>场景生成：从"造物"到"造世界"</h2><div class="q">多了哪些挑战？</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p>物体生成 = "造一个杯子"；场景生成 = "布置一整个厨房"。</p>
+      <p><strong>场景生成的核心挑战：</strong></p>
+      <ul>
+        <li><strong>布局合理性</strong>——桌子和椅子的位置关系要对</li>
+        <li><strong>支撑关系</strong>——杯子在桌上（不是悬空），灯在天花板上</li>
+        <li><strong>碰撞避免</strong>——物体不能互相穿模</li>
+        <li><strong>语义一致</strong>——厨房里不该出现床，书房里不该出现浴缸</li>
+        <li><strong>功能合理</strong>——椅子面向桌子，不是背对桌子</li>
+      </ul>
+      <p><strong>技术范式：</strong></p>
+      <ul>
+        <li><strong>多模态学习</strong>：从文本/图像/视频生成场景</li>
+        <li><strong>智能体推理</strong> 🆕：用 LLM/VLM 当"设计师"——理解意图→拆解任务→规划布局→迭代纠正</li>
+      </ul>
+      <div class="tip">💡 <strong>雪宝的"室内设计比喻"</strong>：物体生成=买家具；场景生成=请设计师+施工队——不仅要家具好看，还要摆放合理，能住人。</div>
+    </div>
+  </div>
+
+  <!-- ═══ 6. 世界模型 ═══ -->
+  <div class="concept" id="c6">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">6</div>
+      <div class="info"><h2>世界模型：不只是"看"世界，还要"懂"世界</h2><div class="q">从静态 3D 到可交互 4D</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p><strong>世界模型</strong>是 AI 对物理世界的内在"理解"——不只是看到世界长什么样，还能<strong>预测"下一步会发生什么"</strong>。</p>
+      <div class="highlight">
+        💡 <strong>雪宝的"下棋比喻"</strong>：<br>
+        普通 3D 生成 = 给你一张棋盘的照片（静态）<br>
+        世界模型 = 你不只能看到棋盘，还能<strong>预测"走这一步之后棋局会变成什么样"</strong>（动态因果推理）
+      </div>
+      <p><strong>世界模型的核心能力：</strong></p>
+      <ul>
+        <li><strong>视频预测</strong>——给定当前画面，预测下一秒</li>
+        <li><strong>未来状态想象</strong>——"如果我把这个杯子推下桌，会发生什么？"</li>
+        <li><strong>逆动力学</strong>——"要达到这个结果，我应该怎么移动？"</li>
+        <li><strong>物理合理性</strong>——重力、碰撞、形变——符合物理定律</li>
+      </ul>
+      <p><strong>与 3D 生成的关系</strong>：3D 生成是构建世界模型的"基础素材"，世界模型是 3D 生成的"终极目标"。两者正在融合——<strong>从"生成好看的"走向"生成能用的、符合物理规律的"</strong>。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 7. 高模 vs 低模 ═══ -->
+  <div class="concept" id="c7">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">7</div>
+      <div class="info"><h2>高模生成 vs 低模生成</h2><div class="q">为什么工业界更在乎"能用的"而不是"好看的"？</div></div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+      <p>从"视觉可看"走向"工业可用"，关键在于区分<strong>高模</strong>和<strong>低模</strong>：</p>
+      <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>高模（精细）</th><th>低模（可用）</th></tr>
+        <tr><td><strong>目标</strong></td><td>细节丰富、视觉真实感</td><td>拓扑正确、面数可控</td></tr>
+        <tr><td><strong>面数</strong></td><td>几百万到上亿</td><td>几百到几千</td></tr>
+        <tr><td><strong>技术路线</strong></td><td>多视角重建（LRM, InstantMesh）<br>3D原生扩散（TRELLIS, Lattice）</td><td>自回归（MeshGPT, MeshXL）<br>扩散（SpaceMesh, MeshFlow）</td></tr>
+        <tr><td><strong>直接用途</strong></td><td>影视渲染、3D打印（需后处理）</td><td>游戏引擎、AR/VR 直接可用</td></tr>
+        <tr><td><strong>核心挑战</strong></td><td>几何精度、纹理一致性</td><td>拓扑质量、UV 展开、LOD 支持</td></tr>
+      </table>
+      </div>
+      <div class="tip-warn">
+        ⚠️ <strong>雪宝提醒</strong>：生成一个"好看的雕像"（高模）相对容易。但生成一个"拓扑正确、有 UV、能直接导入 Unity/Unreal 的完整游戏资产"（低模）才是真正的<strong>技术壁垒和商业价值所在</strong>。
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ❄️ <span class="s">Snowia</span> · GRMG Day 2 · 点卡片展开详情 · 明早加油！🚀
+</footer>
+
+<script>
+function toggle(el) {
+  var card = el.closest ? el.closest('.concept') : el.parentElement;
+  if (!card) return;
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+  }
+}
+</script>
+
+</body>
+</html>

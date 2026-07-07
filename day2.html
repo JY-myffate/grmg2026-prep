@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>三维几何 · Day 2 知识预备手册</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0b0e17; --surface: #111827; --surface-2: #1a2332; --surface-3: #1f2b3c;
+    --border: #2a3a50; --accent: #6eb5ff; --accent-dim: #3b7bbf;
+    --accent-glow: rgba(110,181,255,0.08);
+    --text: #e8edf4; --text-dim: #8899b0; --text-muted: #5a6f88;
+    --green: #4ade80; --orange: #fbad37; --pink: #f472b6; --purple: #a78bfa; --teal: #2dd4bf;
+    --radius: 12px; --radius-sm: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg); color: var(--text);
+    line-height: 1.7; -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+  nav.side-nav {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 260px;
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 32px 0; overflow-y: auto; z-index: 100;
+  }
+  nav.side-nav::-webkit-scrollbar { width: 4px; }
+  nav.side-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .nav-header { padding: 0 24px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .nav-header h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .nav-header p { font-size: 11px; color: var(--text-muted); }
+  nav.side-nav a {
+    display: block; padding: 8px 24px; color: var(--text-dim); text-decoration: none;
+    font-size: 13px; transition: all 0.15s; border-left: 2px solid transparent;
+  }
+  nav.side-nav a:hover { color: var(--text); background: var(--accent-glow); border-left-color: var(--accent); }
+
+  main { margin-left: 260px; max-width: 960px; padding: 48px 56px 80px; }
+  .hero { padding-bottom: 40px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .hero .badge {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--accent); background: var(--accent-glow);
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { font-size: 16px; color: var(--text-dim); margin-bottom: 12px; }
+  .hero .meta { display: flex; gap: 24px; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; }
+  .hero .desc {
+    margin-top: 20px; padding: 16px 20px; background: var(--surface-2);
+    border-radius: var(--radius-sm); border-left: 3px solid var(--accent);
+    font-size: 14px; color: var(--text-dim); line-height: 1.8;
+  }
+
+  section { margin-bottom: 48px; }
+  section h2 {
+    font-size: 20px; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--accent-glow); color: var(--accent); font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+
+  .timetable { display: flex; flex-direction: column; gap: 4px; }
+  .tt-row {
+    display: grid; grid-template-columns: 80px 1fr 140px 80px;
+    gap: 12px; padding: 10px 16px; border-radius: var(--radius-sm);
+    align-items: center; font-size: 13px; transition: background 0.15s;
+  }
+  .tt-row:hover { background: var(--surface-2); }
+  .tt-row .time { color: var(--text-muted); font-family: var(--mono); font-size: 12px; }
+  .tt-row .title { color: var(--text); font-weight: 500; }
+  .tt-row .speaker { color: var(--text-dim); font-size: 12px; }
+  .tt-row.tt-header {
+    color: var(--text-muted); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 600; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border); margin-bottom: 4px; pointer-events: none;
+  }
+  .tt-row.tt-break { color: var(--text-muted); font-style: italic; background: var(--surface); border: 1px dashed var(--border); }
+  .tt-row .tag { font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-align: center; }
+
+  .session-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .session-card:hover { border-color: var(--accent-dim); }
+  .session-card .card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 16px; gap: 16px;
+  }
+  .session-card .card-header h3 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+  .session-card .card-header .meta-box { text-align: right; flex-shrink: 0; }
+  .session-card .card-header .meta-box .time { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .session-card .card-header .meta-box .speaker { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .session-card .card-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.8; margin-bottom: 16px; }
+  .session-card .card-desc strong { color: var(--text); }
+  .session-card .card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px; }
+
+  .knowledge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .knowledge-item { background: var(--surface-2); border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--border); }
+  .knowledge-item .k-term { font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+  .knowledge-item .k-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; }
+
+  .flow {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 16px; background: var(--surface-2); border-radius: var(--radius-sm);
+    margin: 12px 0; font-size: 12.5px;
+  }
+  .flow .f-item { background: var(--surface-3); padding: 6px 12px; border-radius: 6px; color: var(--text-dim); white-space: nowrap; }
+  .flow .f-arrow { color: var(--text-muted); font-size: 16px; }
+  .flow .f-highlight { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent-dim); }
+
+  .data-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 12px 0; font-size: 13px; }
+  .data-table th {
+    text-align: left; padding: 10px 14px; background: var(--surface-2);
+    color: var(--text-muted); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border);
+  }
+  .data-table th:first-child { border-radius: 6px 0 0 0; }
+  .data-table th:last-child { border-radius: 0 6px 0 0; }
+  .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-dim); line-height: 1.6; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface-2); }
+
+  .tip { padding: 14px 18px; background: rgba(110,181,255,0.06); border: 1px solid rgba(110,181,255,0.15); border-radius: var(--radius-sm); margin: 12px 0; font-size: 13px; color: var(--text-dim); line-height: 1.8; }
+  .tip strong { color: var(--accent); }
+  .tip-warn { background: rgba(251,173,55,0.06); border-color: rgba(251,173,55,0.15); }
+  .tip-warn strong { color: var(--orange); }
+  .tip-star { background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.2); }
+  .tip-star strong { color: var(--pink); }
+
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); }
+  footer .snowia { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    nav.side-nav { display: none; }
+    main { margin-left: 0; padding: 28px 18px 60px; }
+    .hero h1 { font-size: 26px; }
+    .hero .desc { font-size: 13px; padding: 14px 16px; }
+    .knowledge-grid { grid-template-columns: 1fr; }
+    .session-card { padding: 18px; }
+    .session-card .card-header { flex-direction: column; }
+    .session-card .card-header h3 { font-size: 16px; }
+    .session-card .card-header .meta-box { text-align: left; }
+    .tt-row { grid-template-columns: 70px 1fr 90px; gap: 8px; padding: 8px 12px; font-size: 12px; }
+    .tt-row .tag { display: none; }
+    .data-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    footer { flex-direction: column; gap: 6px; text-align: center; font-size: 11px; }
+  }
+  @media (max-width: 600px) {
+    main { padding: 20px 14px 50px; }
+    .hero h1 { font-size: 22px; }
+    .hero .subtitle { font-size: 14px; }
+    .hero .meta { gap: 10px; font-size: 11px; }
+    .hero .desc { font-size: 12.5px; padding: 12px 14px; }
+    .tt-row { grid-template-columns: 58px 1fr; font-size: 11px; }
+    .tt-row .speaker { display: none; }
+    section { margin-bottom: 28px; }
+    section h2 { font-size: 15px; }
+    section h2 .num { width: 26px; height: 26px; font-size: 12px; }
+    .session-card { padding: 14px 16px; border-radius: 10px; }
+    .session-card .card-header h3 { font-size: 15px; }
+    .session-card .card-desc { font-size: 12.5px; }
+    .data-table { font-size: 11px; }
+    .tip { font-size: 12px; padding: 10px 12px; }
+    .flow { font-size: 10px; padding: 10px; }
+    .flow .f-item { padding: 3px 7px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="side-nav">
+  <div class="nav-header"><h2>GRMG 2026</h2><p>Day 2 · 知识预备</p></div>
+  <a href="#overview">📋 课程速览</a>
+  <a href="#s1">01 三维生成模型 (2)</a>
+  <a href="#s2">02 鸿蒙 3DGS 商用</a>
+  <a href="#s3">03 装配体与关节物体</a>
+  <a href="#s4">04 三维场景生成</a>
+  <a href="#s5">05 物体摆放与场景生成</a>
+  <a href="#s6">06 具身智能与3D</a>
+  <a href="#s7">07 混元 3D 大模型</a>
+  <a href="#s8">08 3D生成表征之路</a>
+  <a href="#s9">09 全栈架构实践</a>
+  <a href="#s10">10 工业可用3D生成</a>
+  <a href="#s11">11 课程总结</a>
+</nav>
+
+<main>
+
+<div class="hero">
+  <div class="badge">❄️ Snowia · 为你定制</div>
+  <h1>三维几何表达、<span>建模与生成</span></h1>
+  <p class="subtitle">Day 2 知识预备手册 · 2026 年 7 月 8 日</p>
+  <div class="meta">
+    <span>📍 中国科学技术大学</span>
+    <span>⏱ 08:30 – 17:50</span>
+    <span>📐 11 节课程</span>
+  </div>
+  <div class="desc">
+    Day 2 是整场讲习班的 <strong>尖峰</strong>——从生成模型的时间线演进一路铺到具身智能和工业落地，前沿感拉满。<br>
+    上午偏 <strong>生成技术演进 + 场景生成</strong>，下午偏 <strong>具身智能 + 产业落地</strong>。
+  </div>
+</div>
+
+<section id="overview">
+  <h2><span class="num">📋</span> 本日课程速览</h2>
+  <div class="timetable">
+    <div class="tt-row tt-header"><span>时间</span><span>课程题目</span><span>授课人</span><span>标签</span></div>
+    <div class="tt-row"><span class="time">08:30</span><span class="title">三维生成模型 (2)</span><span class="speaker">张彪 / 王鹏帅</span><span class="tag" style="background:rgba(244,114,182,0.15);color:var(--pink);">⭐⭐⭐核心</span></div>
+    <div class="tt-row"><span class="time">09:30</span><span class="title">鸿蒙空间化与3DGS商用</span><span class="speaker">黄然 · 华为</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row tt-break"><span class="time">10:00</span><span class="title break">☕ 茶歇</span><span class="speaker"></span><span></span></div>
+    <div class="tt-row"><span class="time">10:10</span><span class="title">装配体与关节物体生成</span><span class="speaker">穆亚东 · 北大</span><span class="tag" style="background:rgba(167,139,250,0.15);color:var(--purple);">前沿</span></div>
+    <div class="tt-row"><span class="time">10:50</span><span class="title">基于生成式AI的场景生成</span><span class="speaker">盛律 · 北航</span><span class="tag" style="background:rgba(167,139,250,0.15);color:var(--purple);">前沿</span></div>
+    <div class="tt-row"><span class="time">11:30</span><span class="title">物体摆放与场景生成</span><span class="speaker">刘中远 · 腾讯</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row tt-break"><span class="time">12:00</span><span class="title break">🍱 午餐</span><span class="speaker"></span><span></span></div>
+    <div class="tt-row"><span class="time">14:30</span><span class="title">具身智能与3D生成</span><span class="speaker">穆尧 · 上交</span><span class="tag" style="background:rgba(244,114,182,0.15);color:var(--pink);">⭐⭐⭐核心</span></div>
+    <div class="tt-row tt-break"><span class="time">15:30</span><span class="title break">☕ 茶歇</span><span class="speaker"></span><span></span></div>
+    <div class="tt-row"><span class="time">15:40</span><span class="title">3D大模型：物体生成→世界模型</span><span class="speaker">王腾飞 · 腾讯混元</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row"><span class="time">16:10</span><span class="title">3D生成大模型的表征之路</span><span class="speaker">贾荣飞 · 数美万物</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row"><span class="time">16:40</span><span class="title">全栈架构实践</span><span class="speaker">曹炎培 · VAST</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row"><span class="time">17:10</span><span class="title">迈向工业可用的3D生成</span><span class="speaker">许家乐 · Meshy</span><span class="tag" style="background:rgba(251,173,55,0.15);color:var(--orange);">产业</span></div>
+    <div class="tt-row"><span class="time">17:40</span><span class="title">课程总结</span><span class="speaker">刘利刚 · 中科大</span><span class="tag" style="background:rgba(110,181,255,0.15);color:var(--accent);">综述</span></div>
+  </div>
+</section>
+
+<!-- ═══ Session 1 ═══ -->
+<section id="s1">
+  <h2><span class="num">01</span> 三维生成模型 (2)</h2>
+  <div class="session-card" style="border-color: rgba(244,114,182,0.3);">
+    <div class="card-header">
+      <h3>张彪 (西安交大) / 王鹏帅 (北京大学)</h3>
+      <div class="meta-box"><div class="time">08:30 – 09:30</div><div class="speaker">60 min · ⭐⭐⭐ 绝对核心</div></div>
+    </div>
+    <div class="card-desc">
+      Day 1 讲完了"生成模型基础"和"三维数据表征"，Day 2 接着讲<strong>由表征驱动的三维生成方法演进</strong>——从 2016 到 2025，一张完整的时间线。
+    </div>
+
+    <div class="card-label">📈 里程碑时间线（由表征驱动的演进）</div>
+    <div class="flow">
+      <span class="f-item">经典探索期<br><small>2016-2022</small></span>
+      <span class="f-arrow">→</span>
+      <span class="f-item">SDS 阶段<br><small>2022-2023</small></span>
+      <span class="f-arrow">→</span>
+      <span class="f-item">多视角扩散<br><small>2023-2024</small></span>
+      <span class="f-arrow">→</span>
+      <span class="f-item f-highlight">原生3D大模型<br><small>2023-2025</small></span>
+      <span class="f-arrow">→</span>
+      <span class="f-item f-highlight">网格直接生成<br><small>2025-至今</small></span>
+    </div>
+
+    <div class="card-label">🗺 五个阶段详解</div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">① 经典探索期 (2016-2022)</div>
+        <div class="k-desc">从 VAE/GAN 直接生成体素/点云，到<strong>隐式表示革命</strong>（Occupancy Networks, DeepSDF）。关键突破：证明隐式表示能生成高质量连续表面。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">② SDS 阶段 (2022-2023) 🔥</div>
+        <div class="k-desc"><strong>DreamFusion</strong> 开创 SDS 范式——用预训练 2D 扩散模型指导 3D 优化。不需 3D 数据！但每个样本需单独优化（分钟级），存在多视角不一致。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">③ 多视角扩散 (2023-2024) ⚡</div>
+        <div class="k-desc">先<strong>生成一致的多视角图像</strong>（MVDream, Zero123），再通过前馈重建模型得到 3D 结构。代表：<strong>Instant3D、Wonder3D、InstantMesh</strong>。推理 10 秒内！</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">④ 原生 3D 大模型 (2023-2025) 🏆</div>
+        <div class="k-desc">两条路线：<strong>稀疏体素</strong>（TRELLIS, Sparc3D）vs <strong>VecSet</strong>（Hunyuan3D, CLAY, TripoSG）。面向生产级应用！</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">⑤ 网格直接生成 (2025-) 🆕</div>
+        <div class="k-desc">跳过隐式场，<strong>直接生成拓扑正确的三角形网格</strong>。PolyGen, MeshGPT, MeshXL。端到端生产级！</div>
+      </div>
+    </div>
+
+    <div class="tip-star">
+      ⭐ <strong>雪宝提醒</strong>：这条时间线是 Day 2 最重要的知识骨架。SDS→多视角→原生→网格直接生成，每次跃迁都解决了上一代的一个瓶颈。听这堂课前，<strong>务必搞清楚 SDS 的原理</strong>（见知识体系图谱）！
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 2 ═══ -->
+<section id="s2">
+  <h2><span class="num">02</span> 鸿蒙空间化与 3DGS 商用</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>黄然 · 华为</h3>
+      <div class="meta-box"><div class="time">09:30 – 10:00</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      从<strong>技术到商用落地</strong>的完整案例。鸿蒙系统已实现 6000 万商用突破，3DGS 在鸿蒙空间化战略中发挥了关键作用。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">鸿蒙空间化</div>
+        <div class="k-desc">方舟图形引擎 + 3DGS 技术。从 Remy（3D 虚拟人）到 3D 空间影像壁纸，再到更多生态应用。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">3DGS 在手机上的挑战</div>
+        <div class="k-desc">内存限制、算力限制、发热控制。如何把 PC 上跑的高斯球压缩到手机能跑的规模？</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">三大用户体验</div>
+        <div class="k-desc">空间影像壁纸（动态 3D 壁纸）、Remy（3D 互动助手）、AR 空间交互。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝提醒</strong>：这是很好的"技术落地"案例。NeRF/3DGS 不只是学术论文里的东西，已经在你的华为手机里了！
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 3 ═══ -->
+<section id="s3">
+  <h2><span class="num">03</span> 装配体与关节可动对象生成</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>穆亚东 · 北京大学</h3>
+      <div class="meta-box"><div class="time">10:10 – 10:50</div><div class="speaker">40 min</div></div>
+    </div>
+    <div class="card-desc">
+      不只是生成一个物体，而是生成<strong>多个零件组装在一起</strong>的物体（如一把椅子由座面+椅腿+螺丝组成），并且<strong>零件之间能活动</strong>（如抽屉能拉开）。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">装配体生成</div>
+        <div class="k-desc">生成多个零件并"组装"成整体。难点：零件间的几何配合、碰撞检测、装配顺序。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">关节可动对象</div>
+        <div class="k-desc">带铰链/滑轨的物体（剪刀、抽屉、笔记本电脑）。需预测关节位置和运动范围。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">技术路线</div>
+        <div class="k-desc">图网络（零件间关系）→ 序列生成（装配顺序）→ 扩散模型（端到端生成）→ 多模态大模型 + 智能体。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝的"乐高比喻"</strong>：普通 3D 生成是"生成一个完整的乐高成品"；装配体生成是"生成一堆积木块+组装说明书"；关节物体是"生成的积木块还能动"。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 4 ═══ -->
+<section id="s4">
+  <h2><span class="num">04</span> 基于生成式 AI 的三维场景生成</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>盛律 · 北京航空航天大学</h3>
+      <div class="meta-box"><div class="time">10:50 – 11:30</div><div class="speaker">40 min</div></div>
+    </div>
+    <div class="card-desc">
+      从"生成单个物体"升级到<strong>"生成完整场景"</strong>。不只要生成物体，还要考虑物体间的空间关系、语义合理性（杯子在桌上，不在天上）。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">场景生成的挑战</div>
+        <div class="k-desc">物体布局（哪里放什么）、空间约束（支撑关系、碰撞避免）、语义一致（厨房里不该有床）。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">多模态学习路线</div>
+        <div class="k-desc">从文本/图像/视频生成符合视觉、语义与结构需求的三维场景。包含<strong>单一场景生成</strong>与<strong>组合式场景生成</strong>。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">智能体推理路线 🆕</div>
+        <div class="k-desc">LLM/VLM 作为"设计师"——理解设计意图、拆解任务、规划方案、生成资产、推理空间约束、迭代反馈修正。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝的"室内设计比喻"</strong>：物体生成 = 买家具；场景生成 = 请设计师帮你布置整个家——不仅要家具好看，还要摆放合理、风格统一。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 5 ═══ -->
+<section id="s5">
+  <h2><span class="num">05</span> 教 AI 摆放世界</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>刘中远 · 腾讯游戏</h3>
+      <div class="meta-box"><div class="time">11:30 – 12:00</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      聚焦<strong>三维场景中物体摆放</strong>这个最基础也最关键的问题。让 AI 学会"什么东西应该放在哪里"。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">问题的建模</div>
+        <div class="k-desc">场景搭建 = <strong>"单物体迭代摆放"</strong>。逐个添加物体，每次决定"放哪、什么角度"。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">传统方法的局限</div>
+        <div class="k-desc">基于有向包围盒（OBB）难以处理<strong>支撑、包含、避碰</strong>等精细几何约束。杯子放在桌上不是简单的"盒子上放盒子"。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">突破方案</div>
+        <div class="k-desc"><strong>几何感知多模态语言模型</strong>——以点云感知物体与场景的几何，自回归预测物体的 6D 位姿（位置+朝向）。"规划—摆放—验证"智能体闭环。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝的"搭积木比喻"</strong>：传统方法像按格子搭积木（只能叠放）；新方法像一个有空间感的建筑师——知道"这块靠墙放，那块悬空会掉下来"。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 6 ═══ -->
+<section id="s6">
+  <h2><span class="num">06</span> 面向具身智能的三维生成</h2>
+  <div class="session-card" style="border-color: rgba(244,114,182,0.3);">
+    <div class="card-header">
+      <h3>穆尧 · 上海交通大学</h3>
+      <div class="meta-box"><div class="time">14:30 – 15:30</div><div class="speaker">60 min · ⭐⭐⭐ 绝对核心</div></div>
+    </div>
+    <div class="card-desc">
+      <strong>Day 2 另一个核心课程。</strong> 3D 生成不只是为了"好看"，更是为了<strong>让机器人学会与物理世界交互</strong>。
+    </div>
+
+    <p><strong>课程覆盖四大模块：</strong></p>
+
+    <div class="flow" style="flex-direction: column; align-items: stretch;">
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+        <span class="f-item f-highlight">3D生成 for 具身仿真</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">仿真数据引擎</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">世界模型驱动</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">智能体自进化</span>
+      </div>
+    </div>
+
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">3D生成 for 具身仿真</div>
+        <div class="k-desc">多样化场景生成、可交互物体资产生成、物理属性标注、抓取点标注、仿真用数字孪生。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">仿真数据引擎</div>
+        <div class="k-desc">RoboTwin、ManiTwin、Rein3D 等。任务场景自动构建、专家数据生成、领域随机化、Sim-to-Real 迁移。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">世界模型驱动</div>
+        <div class="k-desc">World Action Model、Video-Action Model、VLA-World Model。视频预测→未来状态想象→动作解码。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">智能体自进化 🔥</div>
+        <div class="k-desc">"环境生成→数据生成→模型训练→评估→诊断→策略改进→验证"闭环。生成式仿真+强化学习+基础模型+智能调度 Agent。</div>
+      </div>
+    </div>
+
+    <div class="tip-star">
+      ⭐ <strong>雪宝提醒</strong>：这是最"未来感"的一节课。想象一下——AI 不仅能生成 3D 场景，还能让机器人在生成的场景中训练、犯错、改进，最终在真实世界里干活。<strong>这就是"空间智能"的终极形态。</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 7 ═══ -->
+<section id="s7">
+  <h2><span class="num">07</span> 3D 大模型：从物体生成到世界模型</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>王腾飞 · 腾讯混元</h3>
+      <div class="meta-box"><div class="time">15:40 – 16:10</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      腾讯在 3D 生成领域的产业实践，从<strong>混元 3D（物体生成）到混元 World（世界模型）</strong>的路线图。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">混元 3D</div>
+        <div class="k-desc">基于 VecSet 表征的三维物体生成。输入文本/图片→输出高质量 3D 模型。面向游戏、电商、设计等场景。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">混元 World</div>
+        <div class="k-desc">世界模型的探索——不仅生成静态物体，还要生成<strong>可交互、符合物理规律</strong>的 3D 世界。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝的"物种进化比喻"</strong>：物体生成 = 学会造"原子"；世界模型 = 学会用原子搭建出"整个宇宙"——还要让宇宙有物理规律。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 8 ═══ -->
+<section id="s8">
+  <h2><span class="num">08</span> 3D 生成大模型的表征之路</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>贾荣飞 · 数美万物</h3>
+      <div class="meta-box"><div class="time">16:10 – 16:40</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      为什么 3D 生成比 2D 难一个数量级？核心原因在于<strong>表征的选择</strong>——3D 没有一个像"像素"那样简单统一的表示。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">四次表征跨越</div>
+        <div class="k-desc">SDS蒸馏时代 → 多视图+稀疏视角重建 → 3D原生时代 → Sparse Voxel时代。每次跨越都在逼近"生产级可用"。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">Sparc3D</div>
+        <div class="k-desc">业内首个 1536³ 分辨率 3D 几何大模型。基于稀疏体素，支持超高分辨率。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">Hitem3D 2.0</div>
+        <div class="k-desc">业内首个原生 3D 纹理生成框架 + 最优 3D 语义分割。几何+纹理+分割全链路。</div>
+      </div>
+    </div>
+    <div class="tip-warn">
+      ⚠️ <strong>雪宝提醒</strong>：关键洞察——3D 生成比 2D 难一个数量级，根本原因是<strong>三维没有"像素"那样的统一表示</strong>。2D 的像素是规则的网格，3D 的体素是 O(n³) 的灾难。选择什么表征，直接决定了生成质量和效率的上限。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 9 ═══ -->
+<section id="s9">
+  <h2><span class="num">09</span> 融合经典与前沿：全栈架构实践</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>曹炎培 · VAST</h3>
+      <div class="meta-box"><div class="time">16:40 – 17:10</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      如何打破 <strong>生成速度、质量与工业管线可用性之间的"不可能三角"</strong>？VAST 从全栈视角给出答案。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">"不可能三角"</div>
+        <div class="k-desc">3D 生成中，<strong>速度快、质量高、工业可用</strong>三者很难兼得。往往只能占两样。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">从"雕像"到"资产"</div>
+        <div class="k-desc">生成一个"好看的雕像"（NeRF 输出）容易，但变成<strong>工业级结构化资产</strong>（可编辑、可绑定、可动画的 Mesh）才是真正的挑战。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">自动化管线</div>
+        <div class="k-desc">结构化重拓扑、语义解耦、自动化骨骼绑定、纹理全局一致性、动作引导的时空扩散。</div>
+      </div>
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝的"毛坯房 vs 精装修比喻"</strong>：很多 3D 生成模型只能给你"毛坯房"（粗糙的 Mesh/NeRF），VAST 做的事是把毛坯房装修成"精装房"（拓扑正确、可绑定动画、纹理一致、能直接进游戏引擎）。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 10 ═══ -->
+<section id="s10">
+  <h2><span class="num">10</span> 迈向工业可用的 3D 生成</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>许家乐 · Meshy</h3>
+      <div class="meta-box"><div class="time">17:10 – 17:40</div><div class="speaker">30 min · 产业前沿</div></div>
+    </div>
+    <div class="card-desc">
+      3D 生成从"视觉可看"走向"工业可用"的关键：<strong>高模生成 vs 低模生成</strong>。
+    </div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item">
+        <div class="k-term">高模生成（精细）</div>
+        <div class="k-desc">基于多视角重建（LRM, Instant3D, InstantMesh, FreeSplatter）或基于 3D 原生扩散（3DShape2VecSet, TRELLIS, Lattice）。追求细节和真实感。</div>
+      </div>
+      <div class="knowledge-item">
+        <div class="k-term">低模生成（可用）</div>
+        <div class="k-desc">基于自回归（MeshGPT, MeshXL, TreeMeshGPT）或基于扩散（SpaceMesh, MeshFlow）。追求拓扑正确、面数可控、可直接进游戏引擎。</div>
+      </div>
+    </div>
+    <div class="tip-warn">
+      ⚠️ <strong>雪宝提醒</strong>：工业界真正需要的是<strong>低模</strong>——拓扑正确、面数可控、有 UV、能直接导入游戏引擎或 3D 打印软件。生成一个好看的"高模雕像"相对容易，但生成一个"能直接用的低模"才是真正的技术壁垒。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Session 11 ═══ -->
+<section id="s11">
+  <h2><span class="num">11</span> 课程总结</h2>
+  <div class="session-card">
+    <div class="card-header">
+      <h3>刘利刚 · 中国科学技术大学</h3>
+      <div class="meta-box"><div class="time">17:40 – 17:50</div><div class="speaker">10 min</div></div>
+    </div>
+    <div class="card-desc">
+      两天的课程收尾。刘利刚老师将串起两天所有内容，形成统一的三维几何世界观。
+    </div>
+    <div class="tip">
+      💡 <strong>雪宝建议</strong>：最后 10 分钟别走！这是整场讲习班的"点睛之笔"，刘老师会把两天的知识串成一条完整的逻辑链。
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Knowledge Dependency ═══ -->
+<section>
+  <h2><span class="num">📊</span> Day 2 知识依赖关系</h2>
+  <div class="session-card">
+    <div class="flow" style="flex-direction: column; align-items: center; background: transparent; padding: 0;">
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+        <span class="f-item f-highlight">生成模型(2)</span>
+        <span class="f-arrow">↓</span>
+        <span class="f-item">3DGS商用</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">装配体生成</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item f-highlight">场景生成</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">物体摆放</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px;">
+        <span class="f-arrow" style="font-size: 20px;">⬇</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+        <span class="f-item f-highlight">具身智能</span>
+        <span class="f-arrow">⊗</span>
+        <span class="f-item">3D大模型</span>
+        <span class="f-arrow">⇌</span>
+        <span class="f-item">表征之路</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">全栈实践</span>
+        <span class="f-arrow">→</span>
+        <span class="f-item">工业可用</span>
+      </div>
+    </div>
+    <div style="margin-top: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">
+      上午（生成演进 → 场景）→ 下午（具身智能 → 产业落地）
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Day 2 Checklist ═══ -->
+<section>
+  <h2><span class="num">✅</span> Day 2 出发前 Check List</h2>
+  <div class="session-card">
+    <p style="color: var(--text-dim); margin-bottom: 16px; font-size: 14px;">Day 2 偏前沿和产业，去之前了解这些概念，听懂率 +60% 😎</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">SDS 的原理</strong><br>怎么用 2D 扩散模型指导 3D 优化？DreamFusion 的大致流程
+      </div>
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">多视角重建 vs 原生 3D</strong><br>先图后模型 vs 直接生成 3D，两条路线的区别
+      </div>
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">稀疏体素 & VecSet</strong><br>两种主流生产级表征，知道它们的区别
+      </div>
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">场景生成 vs 物体生成</strong><br>多了布局、支撑关系、语义一致性等挑战
+      </div>
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">世界模型</strong><br>不只是生成静态 3D，还要能预测"下一步会发生什么"
+      </div>
+      <div style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--accent);">高模 vs 低模</strong><br>高模=精细好看，低模=拓扑正确能直接用于游戏引擎
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Nav to other pages ═══ -->
+<section>
+  <h2><span class="num">🔗</span> 其他参考页面</h2>
+  <div class="session-card" style="text-align: center;">
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      <a href="index.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">📖 Day 1 预备手册</a>
+      <a href="concepts.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">📝 8 大概念详解</a>
+      <a href="knowledge.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">🗺️ 知识体系图谱</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>❄️ <span class="snowia">Snowia</span> · 为 boss 定制</span>
+  <span>GRMG 2026 · Day 2 知识预备手册</span>
+</footer>
+
+</main>
+</body>
+</html>
