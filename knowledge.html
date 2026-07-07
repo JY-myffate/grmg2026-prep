@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GRMG 三维几何 · 知识体系图谱</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #080b14;
+    --card: #0f1625;
+    --card-2: #161f32;
+    --border: #1f2d48;
+    --accent: #6eb5ff;
+    --accent-dim: #3366aa;
+    --text: #e4eaf7;
+    --text-dim: #8fa3c4;
+    --text-muted: #4f6688;
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    padding: 40px 20px 32px;
+    text-align: center;
+    background: linear-gradient(180deg, #0c1a30 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(110,181,255,0.1);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    letter-spacing: 0.04em;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* ─── Content ─── */
+  main { padding: 12px 16px 48px; max-width: 820px; margin: 0 auto; }
+
+  /* ─── Concept Card ─── */
+  .concept {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .concept-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .concept-header .num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(110,181,255,0.1);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .concept-header .info { flex: 1; min-width: 0; }
+  .concept-header .info h2 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .concept-header .info .q {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .concept-header .arrow {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    transition: transform 0.25s ease;
+    margin-top: 4px;
+  }
+  .concept.open .concept-header .arrow { transform: rotate(180deg); }
+  .concept-body { display: none; padding: 4px 18px 20px; border-top: 1px solid var(--border); }
+  .concept.open .concept-body { display: block; }
+
+  /* ─── Content Styles ─── */
+  .concept-body p {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    line-height: 1.8;
+  }
+  .concept-body p strong { color: var(--text); font-weight: 600; }
+  .concept-body p .hl { color: var(--accent); font-weight: 600; }
+  .concept-body .highlight {
+    background: var(--card-2);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    margin: 10px 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+  .concept-body .highlight strong { color: var(--text); }
+  .concept-body .highlight .tag {
+    display: inline-block;
+    background: rgba(110,181,255,0.1);
+    color: var(--accent);
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .concept-body .tip {
+    background: rgba(110,181,255,0.04);
+    border: 1px solid rgba(110,181,255,0.12);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .concept-body .tip strong { color: var(--accent); }
+  .concept-body .tip-warn {
+    background: rgba(251,173,55,0.06);
+    border-color: rgba(251,173,55,0.15);
+  }
+  .concept-body .tip-warn strong { color: #fbad37; }
+  .concept-body .tip-star {
+    background: rgba(244,114,182,0.08);
+    border-color: rgba(244,114,182,0.2);
+  }
+  .concept-body .tip-star strong { color: #f472b6; }
+  .concept-body ul {
+    padding-left: 18px;
+    margin: 8px 0;
+    list-style: none;
+  }
+  .concept-body ul li {
+    position: relative;
+    padding-left: 16px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .concept-body ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .concept-body .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 10px 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .concept-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 360px;
+  }
+  .concept-body table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--card-2);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .concept-body table td {
+    padding: 7px 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height: 1.6;
+    vertical-align: top;
+  }
+  .concept-body table tr:last-child td { border-bottom: none; }
+  .concept-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    padding: 24px 20px 32px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  footer .s { color: var(--accent); }
+
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 22px; }
+    .concept-header { padding: 14px 14px; }
+    .concept-header .info h2 { font-size: 14px; }
+    .concept-body { padding: 4px 14px 16px; }
+    .concept-body p { font-size: 13px; }
+    main { padding: 8px 12px 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">❄️ Snowia · 升级版</div>
+  <h1>三维几何 <span>知识体系图谱</span></h1>
+  <p>融合 DeepSeek 深度解析 · GRMG 2026 完整预备</p>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ═══ 1. 三维几何应用与评价 ═══ -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="concept open" id="c1">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🌐</div>
+      <div class="info">
+        <h2>三维几何的应用与评价维度</h2>
+        <div class="q">为什么需要 3D？怎么评价一个表达好不好？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p>三维几何是连接物理世界与数字世界的 <strong>"空间语言"</strong>。它的重要性体现在三个递进的战场：</p>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>战场</th><th>核心领域</th><th>本质目标</th></tr>
+        <tr><td><strong>实</strong>（物理工业）</td><td>CAD、CAE、3D打印、制造</td><td>"制造即数据"——几何是蓝图，误差=废品</td></tr>
+        <tr><td><strong>虚</strong>（数字娱乐）</td><td>游戏、影视、VR、AIGC</td><td>"视觉即真实"——目的是欺骗人眼</td></tr>
+        <tr><td><strong>虚实结合</strong></td><td>AR/XR、数字孪生、机器人、自驾</td><td>"映射即行动"——AI与物理世界交互的桥梁</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝一句话</strong>：3D 已经从"工业图纸"进化到"感官媒介"，最终成为"空间智能的操作系统"。掌握了 3D 表达，就掌握了下一代 AI 的"五官与四肢"。
+      </div>
+
+      <p><strong>评价一个 3D 表达方式好不好，要看五组天平：</strong></p>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>内涵</th><th>现实矛盾</th></tr>
+        <tr><td><strong>显式 vs 隐式</strong></td><td>显式存坐标（Mesh），隐式存函数（SDF）</td><td>显式好渲染，隐式好布尔运算</td></tr>
+        <tr><td><strong>几何 vs 外观</strong></td><td>形状 vs 颜色/材质</td><td>CAD 只关心几何，影视游戏两者都要；NeRF 把两者深度耦合，导致无法单独编辑材质</td></tr>
+        <tr><td><strong>精确 vs 高效</strong></td><td>微米级精度 vs 毫秒级渲染</td><td>NURBS 极精确但计算复杂；Mesh 是黄金平衡点</td></tr>
+        <tr><td><strong>可编辑 vs 可生成</strong></td><td>人能拖拽修改 vs AI 自动产出</td><td>Mesh 编辑方便，但极难生成；NeRF 极易生成，但极难编辑</td></tr>
+        <tr><td><strong>可渲染 vs 可分析</strong></td><td>画出来好看 vs 能算物理仿真</td><td>Mesh 两者兼顾，是"万金油"</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝的"超市比喻"</strong>：选 3D 表达就像去超市买东西——没有"最好的商品"，只有"最适合你要做的菜"。做工业设计用 NURBS，做游戏用 Mesh，做 AI 生成用 NeRF/3DGS。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 2. 三代演化史 ═══ -->
+  <div class="concept" id="c2">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">📜</div>
+      <div class="info">
+        <h2>四十年的三次范式革命</h2>
+        <div class="q">从数学公式到 AI 脑补，人类对"形状"的理解经历了什么？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>时代</th><th>核心逻辑</th><th>代表</th><th>致命缺陷</th></tr>
+        <tr><td><strong>1980s-2000s</strong><br>解析表达</td><td>"形状是公式"<br>用数学精确描述完美曲面</td><td>NURBS, SDF, CSG</td><td><strong>拓扑锁死</strong>——一张 NURBS 只能描述一张"皮"，无法无缝表达"带把手的杯子"</td></tr>
+        <tr><td><strong>2000s-2020s</strong><br>离散表达</td><td>"形状是拼图"<br>用大量小三角形拼出形状</td><td>Mesh, 点云, 体素</td><td><strong>分辨率诅咒</strong>——要精细就得海量三角形，且本质不光滑</td></tr>
+        <tr><td><strong>2020s-未来</strong><br>生成表达</td><td>"形状是概率"<br>不是"构造"形状，而是"学习"分布</td><td>NeRF, 3DGS, 扩散模型</td><td><strong>黑盒难控</strong>——缺乏 CAD 级精度，无法直接编辑</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝的"手机拍照比喻"</strong>：<br>
+        解析表达 = 画家手绘肖像（精确但慢，只能画一张脸）<br>
+        离散表达 = 用马赛克拼照片（能拼出任何图案，但放大全是格子）<br>
+        生成表达 = AI 根据描述脑补出一张照片（栩栩如生，但细节可能不对）
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. 四大传统表达 ═══ -->
+  <div class="concept" id="c3">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">📐</div>
+      <div class="info">
+        <h2>四大传统几何表达</h2>
+        <div class="q">在 AI 出现之前，人类 40 年积累了哪些"武器"？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>离散表达</strong>——用大量"碎片"逼近连续形状：</p>
+      <ul>
+        <li><strong>点云</strong>：一堆散点（激光雷达直接输出）。结构最简单，但没有"面"信息</li>
+        <li><strong>体素</strong>：三维像素（Minecraft 那样的方块）。CNN 友好，但分辨率高了内存爆炸（$O(n^3)$）</li>
+        <li><strong>八叉树</strong>：体素的"智能版"——只在有细节的地方细切分。省内存</li>
+        <li><strong>网格（Mesh）</strong>：三角形面片。GPU 渲染的黄金标准，靠<strong>半边结构</strong>实现 O(1) 邻域查询</li>
+      </ul>
+
+      <p><strong>参数化表达</strong>——用"公式"定义形状，CAD 的根基：</p>
+      <ul>
+        <li><strong>B-rep + CSG</strong>：边界表示 + 布尔运算树。SolidWorks 的核心</li>
+        <li><strong>NURBS</strong>：非均匀有理 B 样条。控制点+节点向量定义光滑曲面。无限分辨率但拓扑锁死</li>
+        <li><strong>参数驱动建模</strong>：尺寸约束（"孔直径=10mm"），改一个参数整个模型联动更新</li>
+      </ul>
+
+      <p><strong>隐式表达</strong>——用"函数场"定义形状：</p>
+      <ul>
+        <li><strong>SDF</strong>：每个点存到表面的距离（负=内部，正=外部）。布尔运算极其简单（取 min=max 求并）</li>
+        <li><strong>水平集</strong>：会"动"的 SDF，物理模拟（如流体融合）的神器</li>
+        <li><strong>Marching Cubes</strong>：把 SDF 变成 Mesh 的"开关"算法——查 256 种配置表，定位等值点</li>
+      </ul>
+
+      <div class="highlight">
+        💡 <strong>一句记住</strong>：离散解决"看"（渲染），参数化解决"造"（精确设计），隐式解决"变"（拓扑演化）。三者没有谁替代谁，只有谁更适合当前任务。
+      </div>
+
+      <p><strong>表达转换（工业界的"巴别塔"）</strong>：现实项目中 99% 的流程都在做"表达间的反复横跳"：</p>
+      <ul>
+        <li>点云 → 网格：泊松重建/滚球算法</li>
+        <li>CAD → 网格：NURBS 细分镶嵌（设弦误差阈值）</li>
+        <li>SDF → 网格：Marching Cubes</li>
+        <li>网格 → 体素：射线投射法</li>
+        <li><strong>网格简化</strong>：QEM（二次误差度量）——迭代折叠对形状贡献最小的边，百万级降到万级</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ 4. 扫描与重建 ═══ -->
+  <div class="concept" id="c4">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">📷</div>
+      <div class="info">
+        <h2>三维扫描与重建：从照片到模型</h2>
+        <div class="q">怎么从 2D 照片"算"出 3D 形状？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>硬件层</strong>——数据从哪来？</p>
+      <ul>
+        <li><strong>被动式</strong>：普通相机。靠算法反推深度（便宜但依赖纹理，白墙就废了）</li>
+        <li><strong>主动式</strong>：激光雷达、结构光。直接测距（不受光照影响，但分辨率低、贵）</li>
+      </ul>
+
+      <p><strong>算法层</strong>——经典几何时代（数学之美）：</p>
+      <div class="highlight">
+        <strong>SfM（运动恢复结构）</strong>：从多张无序照片中批量恢复相机位置+稀疏点云。核心是<strong>捆集调整（Bundle Adjustment）</strong>——同时优化所有相机位姿和 3D 点的重投影误差。代表作：<strong>COLMAP</strong>（学术界标准管线）
+      </div>
+      <div class="highlight">
+        <strong>MVS（多视角立体匹配）</strong>：在 SfM 已知相机位姿的基础上，生成<strong>密集</strong>点云。PMVS、CMVS、深度图融合
+      </div>
+      <div class="highlight">
+        <strong>SLAM（即时定位与建图）</strong>：SfM 的"实时版"——一边移动一边建图。ORB-SLAM3 是经典。核心区别：SfM是"谋定后动"（全局优化），SLAM是"边看边走"（实时增量）
+      </div>
+
+      <p><strong>数据驱动层</strong>——前馈式革命：</p>
+      <ul>
+        <li><strong>单目深度估计</strong>：一张照片直接"脑补"深度（MiDaS、DPT）</li>
+        <li><strong>基于学习的 MVS</strong>：MVSNet 用可微网络替代传统代价体优化</li>
+        <li><strong>前馈式恢复</strong>：一看照片直接输出 3D 模型（毫秒级），不再像 SfM 那样迭代优化</li>
+      </ul>
+
+      <div class="tip tip-warn">
+        ⚠️ <strong>雪宝提醒</strong>：传统几何方法泛化强（无需训练数据），但计算慢+怕弱纹理；深度学习方法极速推理+能"脑补"遮挡部分，但可能产生"幻觉"（生成不存在的结构）。<strong>当前工业界的最佳方案是"几何+学习"深度融合</strong>。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. 3D 形状理解 ═══ -->
+  <div class="concept" id="c5">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🧠</div>
+      <div class="info">
+        <h2>3D 形状理解：让 AI 认得出"这是椅子"</h2>
+        <div class="q">六项核心任务 + 三代技术浪潮</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>六大任务：</strong></p>
+      <ul>
+        <li><strong>分类</strong>——这是椅子还是桌子？</li>
+        <li><strong>分割</strong>——座面、椅腿、靠背分别在哪？</li>
+        <li><strong>匹配</strong>——两个形状怎么对应起来？（用于 3D 人脸识别）</li>
+        <li><strong>检索</strong>——给一个椅子找类似的</li>
+        <li><strong>补全</strong>——被挡住一半，猜出完整形状</li>
+      </ul>
+
+      <p><strong>三代技术浪潮：</strong></p>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>时代</th><th>核心思路</th><th>代表方法</th><th>优势</th><th>痛点</th></tr>
+        <tr><td><strong>传统描述子</strong></td><td>手工设计"几何指纹"</td><td>Spin Image, SHOT, 3D SIFT</td><td>无需训练，可解释</td><td>泛化弱，对噪声敏感</td></tr>
+        <tr><td><strong>MLP/CNN 时代</strong></td><td>每个数据格式各立山头</td><td>PointNet, MeshCNN, 3D CNN, MVCNN</td><td>端到端学习，效果好</td><td>各格式各自为政</td></tr>
+        <tr><td><strong>Transformer 时代</strong></td><td>注意力大一统</td><td>PointTransformer, PCT, Mesh Transformer</td><td>全局上下文，长程依赖</td><td>计算量大（O(n²)）</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝的"身份验证比喻"</strong>：<br>
+        传统描述子像"测指纹"——每个关键点周围统计几何分布生成"指纹"<br>
+        PointNet 像"开讨论会"——每个点独立发言，最后取"最尖锐的评论"（max pooling）决定结果<br>
+        Transformer 像"全员连线"——每个点都和所有其他点交换信息，抓住全局关系
+      </div>
+
+      <p><strong>PointNet 的革命性（2017）：</strong>用对称函数（max pooling）解决点云的无序性——不管点以什么顺序输入，输出都一样。这是所有 3D 深度学习的基石。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 6. NeRF ═══ -->
+  <div class="concept" id="c6">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">⚡</div>
+      <div class="info">
+        <h2>NeRF — 神经辐射场 (2020)</h2>
+        <div class="q">一个 MLP 网络，凭什么引爆了整个三维视觉？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>核心理念：</strong>放弃"显式几何+纹理"的分离思路，直接用 MLP 的权重同时编码<strong>几何（密度）</strong>和<strong>外观（颜色）</strong>。这种"耦合"换来了照片级真实感，代价是牺牲了可编辑性。</p>
+
+      <div class="highlight">
+        💡 <strong>雪宝的"雾中看物"比喻：</strong><br>
+        想象整个场景充满了发光的雾气。每个位置 (x,y,z) 有颜色（什么颜色）和不透明度（多浓）。<br>
+        一条光线穿过这团雾气 → 沿途采样 → 累积所有点的颜色×透过度 → 得到像素颜色。<br>
+        这个过程叫<strong>体渲染 (Volume Rendering)</strong>。
+      </div>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>组件</th><th>干什么的</th><th>一句话</th></tr>
+        <tr><td><strong>MLP 网络</strong></td><td>输入 (x,y,z)+(θ,φ)，输出 (R,G,B,σ)</td><td>5D→4D 的黑盒函数</td></tr>
+        <tr><td><strong>体渲染公式</strong></td><td>沿光线累计颜色×透明度</td><td>"穿过雾看东西"的数学版</td></tr>
+        <tr><td><strong>位置编码 (PE)</strong></td><td>把坐标映射到高频空间</td><td>"给 MLP 戴上显微镜"</td></tr>
+        <tr><td><strong>分层采样</strong></td><td>先粗采再细采，提高效率</td><td>"先看清楚再深入研究"</td></tr>
+      </table>
+      </div>
+
+      <p><strong>几何提取：</strong>训练完后，用 Marching Cubes 提取密度场的等值面 → 得到 Mesh。</p>
+
+      <div class="tip tip-warn">
+        ⚠️ <strong>NeRF 的三座大山：</strong><br>
+        1️⃣ <strong>慢</strong>——训练数小时/场景，渲染分钟级/张<br>
+        2️⃣ <strong>几何不精确</strong>——密度场 ≠ 实体表面，表面模糊带噪<br>
+        3️⃣ <strong>无法编辑</strong>——几何和外观打包在同一个 MLP 黑盒里，想换个颜色？得重训！
+      </div>
+
+      <p><strong>动态场景：</strong>引入时间 t 作为额外输入（D-NeRF），或学习一个形变场，将任意时刻映射到规范空间。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 7. 3DGS ═══ -->
+  <div class="concept" id="c7">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">💎</div>
+      <div class="info">
+        <h2>3D Gaussian Splatting (2023)</h2>
+        <div class="q">怎么把 NeRF 从"蜗牛"变成"猎豹"？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p><strong>核心思想：</strong>用海量的<strong>3D 高斯椭球体</strong>代替 MLP。每个高斯球是一个"显式粒子"——有位置、形状、不透明度、颜色。渲染时直接投影到屏幕（像泼溅颜料一样），<strong>实时 >30 FPS</strong>。</p>
+
+      <div class="highlight">
+        💡 <strong>雪宝的"彩色玻璃球比喻"：</strong><br>
+        想象场景由几百万个半透明的彩色玻璃球组成。每个球有自己的位置、大小、颜色、透明度。<br>
+        渲染时：把所有玻璃球投影到屏幕上 → 按距离排序 → 像叠玻璃纸一样混合颜色。<br>
+        这就是 "Splatting"（泼溅）这个名字的由来。
+      </div>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>NeRF</th><th>3D Gaussian Splatting</th></tr>
+        <tr><td><strong>表示方式</strong></td><td>隐式 (MLP 权重)</td><td><strong>显式</strong>（海量高斯基元）</td></tr>
+        <tr><td><strong>渲染速度</strong></td><td>🐢 分钟级/张</td><td>⚡ <strong>实时 >100 FPS</strong></td></tr>
+        <tr><td><strong>训练时间</strong></td><td>小时级</td><td>分钟级</td></tr>
+        <tr><td><strong>可编辑性</strong></td><td>❌ 几乎不能</td><td>✅ 可直接操作基元（删除/移动高斯的颜色）</td></tr>
+        <tr><td><strong>几何提取</strong></td><td>Marching Cubes</td><td>有点难（本质是视觉粒子，需额外处理）</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>3DGS 为什么是"划时代"的？</strong><br>
+        它巧妙地做了"混血儿"——用<strong>显式</strong>的粒子（高斯球）来模拟<strong>隐式</strong>的辐射场。既有 NeRF 的画质，又有实时渲染的速度。<strong>这是目前工业界最炙手可热的方案</strong>（手机/AR/VR 都能跑）。
+      </div>
+
+      <p><strong>动态场景：</strong>4D-GS——把高斯球的属性（位置/旋转/颜色）变成时间的函数，实现动态实时渲染。</p>
+    </div>
+  </div>
+
+  <!-- ═══ 8. 前馈式 NVS ═══ -->
+  <div class="concept" id="c8">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🚀</div>
+      <div class="info">
+        <h2>前馈式新视角合成：告别"每场景重训"</h2>
+        <div class="q">NeRF/3DGS 都要针对每个场景训练，能否让网络"看一眼就会"？</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <p>NeRF 和 3DGS 都有一个致命缺陷：<strong>每个新场景必须从头训练数十分钟到数小时</strong>。前馈式方法的目标是——训练好一个网络后，给它几张新照片，<strong>一次前向传播直接出结果</strong>，不再需要逐场景优化。</p>
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>流派</th><th>核心逻辑</th><th>代表算法</th><th>优势</th><th>痛点</th></tr>
+        <tr><td><strong>显式表征驱动</strong></td><td>"先建体积，再渲染"<br>利用 MVS 思路构建可微代价体</td><td>MVSNeRF, NeuS2</td><td>泛化强，几何精确</td><td>内存高，处理大场景困难</td></tr>
+        <tr><td><strong>无显式表征驱动</strong></td><td>"直接学习图像→隐式场的映射"<br>用 Transformer 在 2D 特征间传信息</td><td>PixelNeRF, SRT, DUSt3R</td><td>极其灵活，不被体积分辨率限制</td><td>依赖大数据，几何精度较低</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝的"学做饭比喻"：</strong><br>
+        NeRF = 每次做新菜都要从头学（逐场景优化）<br>
+        前馈式 = 学成"厨神"后，看一道菜的照片就能完美复刻（一次前向传播）
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 9. 五大生成模型 ═══ -->
+  <div class="concept" id="c9">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🤖</div>
+      <div class="info">
+        <h2>五大生成模型：AI 如何"凭空创造"三维？</h2>
+        <div class="q">VAE / GAN / 自回归 / Diffusion / Flow Matching</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>模型</th><th>核心思想</th><th>三维应用</th><th>一句话比喻</th></tr>
+        <tr><td><strong>VAE</strong></td><td>编码器压成潜分布→解码器重建</td><td>形状插值、潜空间编辑</td><td>"我学会了压缩和解压，但细节记不清了"</td></tr>
+        <tr><td><strong>GAN</strong></td><td>生成器造假 vs 判别器打假</td><td>早期 3D 生成（现在少用）</td><td>"造假者和警察互相逼对方进步"</td></tr>
+        <tr><td><strong>自回归</strong></td><td>逐 token 预测（像写文章）</td><td>PolyGen（逐顶点生成 Mesh）</td><td>"一个词一个词地写出一整篇文章"</td></tr>
+        <tr><td><strong>Diffusion</strong> 🔥</td><td>正向加噪→反向去噪</td><td>Point-E, MVDream, TRELLIS</td><td>"从一坨噪点中逐步洗出清晰照片"</td></tr>
+        <tr><td><strong>Flow Matching</strong> 🔥</td><td>学连续路径从噪声滑向数据</td><td>Stable Diffusion 3, Triplane FM</td><td>"扩散的平滑版，一条滑梯直达终点"</td></tr>
+      </table>
+      </div>
+
+      <div class="highlight">
+        💡 <strong>为什么 Diffusion 是当前王者？</strong><br>
+        训练稳定（不会像 GAN 那样崩）、生成质量高、多样性好。所有主流 AI 生图（Stable Diffusion、Midjourney、DALL·E 3）都基于 Diffusion。<br>
+        Flow Matching 是它的升级版——连续时间视角，采样更快、更稳定。
+      </div>
+
+      <p><strong>SDS — 连接 2D 和 3D 的关键桥梁</strong>：</p>
+      <div class="highlight">
+        用预训练的 2D 扩散模型（Stable Diffusion）作为"裁判"。3D 模型渲染成 2D 图像 → 裁判评价"像不像"→ 信号传回 3D 模型微调。<br>
+        <strong>意义</strong>：不需要 3D 训练数据！用海量 2D 图片就能生成 3D 模型。<strong>代表作：DreamFusion (2022)</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 10. 三维数据表征 ═══ -->
+  <div class="concept" id="c10">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">📦</div>
+      <div class="info">
+        <h2>三维数据表征：AI 生成的"输出格式"</h2>
+        <div class="q">生成出来的东西用什么格式存？选择决定了质量上限</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>表征</th><th>一句话</th><th>适合的生成模型</th></tr>
+        <tr><td><strong>体素</strong></td><td>三维像素（Minecraft）</td><td>VAE、GAN（早期）</td></tr>
+        <tr><td><strong>点云</strong></td><td>无序坐标集合</td><td>Diffusion（Point-E）</td></tr>
+        <tr><td><strong>网格 (Mesh)</strong></td><td>三角形面片（工业标准）</td><td>自回归（PolyGen）</td></tr>
+        <tr><td><strong>SDF</strong></td><td>距离场（几何精确）</td><td>Diffusion（Diffusion-SDF）</td></tr>
+        <tr><td><strong>NeRF</strong></td><td>颜色+密度场（照片级）</td><td>DreamFusion, Magic3D</td></tr>
+        <tr><td><strong>三平面 (Triplane)</strong></td><td>三个 2D 网格表示 3D（高效！）</td><td>EG3D, Triplane Diffusion</td></tr>
+        <tr><td><strong>VecSet</strong></td><td>向量集合（灵活紧凑）</td><td>Hunyuan3D, CLAY</td></tr>
+        <tr><td><strong>稀疏体素</strong> 🔥</td><td>只在表面附近存体素（省内存）</td><td>TRELLIS（支持 1024³ 高分辨率）</td></tr>
+      </table>
+      </div>
+
+      <div class="tip">
+        💡 <strong>雪宝的"文件格式比喻"：</strong><br>
+        体素 = BMP（简单但占空间）<br>
+        点云 = TXT（灵活但没格式）<br>
+        Mesh = PDF（工业标准，万能）<br>
+        三平面 = ZIP（压缩版，高效）<br>
+        稀疏体素 = 只存图片主体的 PNG（聪明地省空间）
+      </div>
+
+      <div class="highlight">
+        <strong>当前 SOTA 组合：</strong>生成模型 × 三维表征<br>
+        <strong>Diffusion + 稀疏体素/三平面</strong> = 目前质量与效率的最佳平衡。<br>
+        代表：微软 <strong>TRELLIS</strong> 用 O-Voxel（稀疏体素+三平面）实现 1024³ 高分辨率生成。<br>
+        腾讯 <strong>Hunyuan3D</strong> 用 VecSet 实现紧凑高效的生成。
+      </div>
+
+      <div class="tip tip-star">
+        ⭐ <strong>未来的趋势</strong>：不再用单一表征，而是<strong>多级混合</strong>——粗粒度用稀疏体素，细粒度用三平面，最终输出 Mesh+纹理。各取所长！
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 11. 交互式建模 ═══ -->
+  <div class="concept" id="c11">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🎨</div>
+      <div class="info">
+        <h2>交互式三维建模：人类怎么"捏"出 3D？</h2>
+        <div class="q">CAD / 草图 / 雕刻 / 程序化——四大流派</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>流派</th><th>核心逻辑</th><th>代表工具</th><th>最适合</th></tr>
+        <tr><td><strong>CAD 建模</strong></td><td>参数驱动，精确约束，历史树</td><td>SolidWorks, Rhino, Catia, AutoCAD</td><td>工业制造、工程装配</td></tr>
+        <tr><td><strong>草图建模</strong></td><td>画几笔→算法自动补全 3D</td><td>Teddy, SketchUp</td><td>快速概念设计</td></tr>
+        <tr><td><strong>雕刻建模</strong></td><td>像捏泥巴一样推拉顶点</td><td>ZBrush, Mudbox</td><td>高精细节（毛孔/鳞片）</td></tr>
+        <tr><td><strong>程序化建模</strong></td><td>算法规则生成（分形/L-Systems）</td><td>Houdini</td><td>大场景/自然景观</td></tr>
+      </table>
+      </div>
+
+      <div class="highlight">
+        💡 <strong>雪宝的"家具制作比喻"：</strong><br>
+        CAD = 木匠用尺规量好尺寸、画好图纸，精确切割每一块木板<br>
+        草图 = 设计师随手画个轮廓，学徒看一眼就用粘土捏出模型<br>
+        雕刻 = 雕塑家对着一块石头，一凿一凿地雕出细节<br>
+        程序化 = 写一个"造树程序"，一键生成一千棵不同的树
+      </div>
+
+      <p><strong>编辑与变形</strong>——模型做好了，想改姿势/形状怎么办？</p>
+      <ul>
+        <li><strong>自由网格变形 (FFD)</strong>：把模型包在一个"果冻框架"里，拉框架点→模型跟着变形</li>
+        <li><strong>微分坐标编辑</strong>：存每个点和邻居的相对位置差。移动时保持这些"差"不变——局部细节不扭曲</li>
+        <li><strong>骨架蒙皮 (Skinning)</strong>：骨骼动→皮肤跟着动。角色动画的基础</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ 12. 终极脉络 ═══ -->
+  <div class="concept" id="c12">
+    <div class="concept-header" onclick="toggle(this)">
+      <div class="num">🎯</div>
+      <div class="info">
+        <h2>终极串联：40 年发展脉络</h2>
+        <div class="q">一条主线 + 两次跃迁 + 未来方向</div>
+      </div>
+      <div class="arrow">▼</div>
+    </div>
+    <div class="concept-body">
+
+      <div class="table-wrap">
+      <table>
+        <tr><th>时期</th><th>追求</th><th>核心技术</th><th>核心矛盾</th></tr>
+        <tr><td><strong>1980s-2000s</strong><br>几何时期</td><td>精确性</td><td>NURBS, Mesh, CAD</td><td>人工成本高</td></tr>
+        <tr><td><strong>2000s-2020s</strong><br>数字化时期</td><td>真实感</td><td>扫描重建, SfM, MVS</td><td>数据获取困难+噪声大</td></tr>
+        <tr><td><strong>2020s-未来</strong><br>智能时期</td><td>创造性</td><td>NeRF, 3DGS, 扩散模型</td><td>可控性差+物理不真实</td></tr>
+      </table>
+      </div>
+
+      <div class="highlight">
+        <strong>三次范式跃迁：</strong><br>
+        🏛️ <strong>经典时代</strong>（几何/外观解耦）："拆分与拼凑"。Mesh 管位置，纹理管颜色。真实感天花板低。<br>
+        🧠 <strong>NeRF 时代</strong>（隐式耦合）："函数拟合"。场景就是一个 5D 函数，MLP 暴力拟合。真实感爆棚但慢如蜗牛。<br>
+        💎 <strong>3DGS 时代</strong>（显式粒子耦合）："海量粒子混合"。显式高斯球模拟隐式辐射场。首次实现实时交互。
+      </div>
+
+      <div class="tip">
+        💡 <strong>三句话总结整场讲座的核心：</strong><br>
+        1️⃣ <strong>表达决定了我们能做什么</strong>——从 Mesh 到 NeRF 到 3DGS，是一条逼近"连续、紧凑、可微"的进化链<br>
+        2️⃣ <strong>建模决定了我们怎么做</strong>——从手动到扫描到 AI，是从"复刻现实"走向"创造现实"<br>
+        3️⃣ <strong>生成决定了我们能创造什么</strong>——利用可微表达+海量先验，在数字世界中直接涌现新物种
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ❄️ <span class="s">Snowia</span> · 融合 DeepSeek 深度解析 · 点卡片展开详情
+</footer>
+
+<script>
+function toggle(el) {
+  var card = el.closest ? el.closest('.concept') : el.parentElement;
+  if (!card) return;
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    setTimeout(function() {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+}
+</script>
+
+</body>
+</html>
