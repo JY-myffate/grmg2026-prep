@@ -91,7 +91,7 @@
         <li>把"不像"的梯度信号传回 3D 表示，让它微调</li>
         <li>反复迭代 → 得到从任何角度都像猫的 3D 模型</li>
       </ul>
-      <div class="highlight">💡 <strong>雪宝比喻</strong>：像你画素描，导师（2D 模型）时不时看一眼说"这个角度不对"，你改一下再给他看，反复直到满意。神奇的是导师只见过 2D 图片，没摸过 3D 雕塑！</div>
+      <div class="highlight">💡 <strong>Snowia比喻</strong>：像你画素描，导师（2D 模型）时不时看一眼说"这个角度不对"，你改一下再给他看，反复直到满意。神奇的是导师只见过 2D 图片，没摸过 3D 雕塑！</div>
       <p><strong>局限</strong>：每个样本需要单独优化（分钟级），多视角不一致，几何细节不足。被后续的多视角扩散方法改进。</p>
     </div>
   </div>
@@ -112,7 +112,7 @@
       </div>
       <p><strong>关键突破</strong>：第二步是"前馈"的（一次前向传播），不再需要逐样本优化。推理速度从分钟级降到<strong>10 秒内</strong>！</p>
       <p><strong>局限</strong>：几何精度仍有提升空间，依赖于多视图生成的一致性（如果多视图之间有矛盾，重建会出问题）。</p>
-      <div class="tip">💡 <strong>雪宝的"拍照建模比喻"</strong>：SDS 像画家对着实物反复修改；多视角扩散像你对着物体拍几张照片→AI 一看照片就秒出 3D 模型。显然拍照更快！</div>
+      <div class="tip">💡 <strong>小雪的"拍照建模比喻"</strong>：SDS 像画家对着实物反复修改；多视角扩散像你对着物体拍几张照片→AI 一看照片就秒出 3D 模型。显然拍照更快！</div>
     </div>
   </div>
 
@@ -135,7 +135,7 @@
       </table>
       </div>
       <div class="tip-warn">
-        ⚠️ <strong>雪宝的"图书馆 vs 索引卡比喻"</strong>：<br>
+        ⚠️ <strong>小雪的"图书馆 vs 索引卡比喻"</strong>：<br>
         稀疏体素像图书馆——书按位置摆放，找书快（空间结构好），但书架占地方（内存开销）。<br>
         VecSet 像索引卡片盒——每张卡片描述一本书的关键信息，非常紧凑，但不太"空间直观"。
       </div>
@@ -157,7 +157,7 @@
         <li><strong>代表模型</strong>：PolyGen（自回归逐顶点）、MeshGPT、MeshXL、TreeMeshGPT</li>
         <li><strong>技术意义</strong>：直接输出工业标准格式，减少后处理，真正端到端</li>
       </ul>
-      <div class="highlight">💡 <strong>雪宝的"写作 vs 翻译比喻"</strong>：传统方法像你写中文→机器翻译成英文（隐式→Mesh，多一步损失）；网格直接生成像你直接用英文写作——一步到位，质量更高。</div>
+      <div class="highlight">💡 <strong>小雪的"写作 vs 翻译比喻"</strong>：传统方法像你写中文→机器翻译成英文（隐式→Mesh，多一步损失）；网格直接生成像你直接用英文写作——一步到位，质量更高。</div>
     </div>
   </div>
 
@@ -183,7 +183,7 @@
         <li><strong>多模态学习</strong>：从文本/图像/视频生成场景</li>
         <li><strong>智能体推理</strong> 🆕：用 LLM/VLM 当"设计师"——理解意图→拆解任务→规划布局→迭代纠正</li>
       </ul>
-      <div class="tip">💡 <strong>雪宝的"室内设计比喻"</strong>：物体生成=买家具；场景生成=请设计师+施工队——不仅要家具好看，还要摆放合理，能住人。</div>
+      <div class="tip">💡 <strong>小雪的"室内设计比喻"</strong>：物体生成=买家具；场景生成=请设计师+施工队——不仅要家具好看，还要摆放合理，能住人。</div>
     </div>
   </div>
 
@@ -197,7 +197,7 @@
     <div class="concept-body">
       <p><strong>世界模型</strong>是 AI 对物理世界的内在"理解"——不只是看到世界长什么样，还能<strong>预测"下一步会发生什么"</strong>。</p>
       <div class="highlight">
-        💡 <strong>雪宝的"下棋比喻"</strong>：<br>
+        💡 <strong>小雪的"下棋比喻"</strong>：<br>
         普通 3D 生成 = 给你一张棋盘的照片（静态）<br>
         世界模型 = 你不只能看到棋盘，还能<strong>预测"走这一步之后棋局会变成什么样"</strong>（动态因果推理）
       </div>
@@ -232,7 +232,7 @@
       </table>
       </div>
       <div class="tip-warn">
-        ⚠️ <strong>雪宝提醒</strong>：生成一个"好看的雕像"（高模）相对容易。但生成一个"拓扑正确、有 UV、能直接导入 Unity/Unreal 的完整游戏资产"（低模）才是真正的<strong>技术壁垒和商业价值所在</strong>。
+        ⚠️ <strong>小雪提醒</strong>：生成一个"好看的雕像"（高模）相对容易。但生成一个"拓扑正确、有 UV、能直接导入 Unity/Unreal 的完整游戏资产"（低模）才是真正的<strong>技术壁垒和商业价值所在</strong>。
       </div>
     </div>
   </div>
